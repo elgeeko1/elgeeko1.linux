@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: (c) 2021-2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+- name: Package install python3 {{ core_python_version if core_python_version else 'latest' }}
+  become: true
+  ansible.builtin.package:
+    name:
+      - python3-dev{{ '=' ~ core_python_version if core_python_version else '' }}
+      - python3-pip
+      - python3-virtualenv
+      - python3-setuptools
+      - python3-psutil
+
+- name: Package install python3 apt and debian packages
+  when: ansible_distribution == "Ubuntu"
+  become: true
+  ansible.builtin.apt:
+    pkg:
+      - python3-apt
+      - python3-debian

@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+- name: Fetch GitHub keys for user {{ ssh_server_github_username }}
+  register: _ssh_server_r_gh_keys
+  ansible.builtin.uri:
+    url: https://github.com/{{ ssh_server_github_username }}.keys
+    return_content: true
+    status_code: 200
+    validate_certs: true
+    headers:
+      User-Agent: ansible
+
+- name: Normalize GitHub key list
+  when: _ssh_server_r_gh_keys.status == 200
+  ansible.builtin.set_fact:
+    _ssh_server_github_keys: "{{ _ssh_server_r_gh_keys.content.splitlines() | reject('equalto', '') | list }}"
+
+- name: Authorize keys for host user {{ ssh_server_user }}
+  when:
+    - _ssh_server_r_gh_keys.status == 200
+    - _ssh_server_github_keys | length > 0
+  loop: "{{ _ssh_server_github_keys | default([]) }}"
+  ansible.posix.authorized_key:
+    user: "{{ ssh_server_user }}"
+    key: "{{ item }}"
+    state: present
+    manage_dir: true
+    exclusive: false

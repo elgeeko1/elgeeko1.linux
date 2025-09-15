@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: (c) 2021-2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+- name: Apt update cache
+  when: ansible_distribution == "Ubuntu"
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600 # 1 hr
+
+- name: Install docker engine
+  ansible.builtin.import_tasks: docker-ce.yml
+
+- name: Configure docker for multiarch building
+  when: docker_multiarch
+  ansible.builtin.include_tasks: multiarch.yml
+
+- name: Docker prune
+  when: docker_prune
+  become: true  # ansible_user may not yet be in docker group
+  community.docker.docker_prune:
+    builder_cache: true
+    containers: true
+    images: true
+    networks: true
+    volumes: true

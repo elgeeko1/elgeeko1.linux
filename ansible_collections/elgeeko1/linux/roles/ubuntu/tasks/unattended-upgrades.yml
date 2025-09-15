@@ -1,0 +1,88 @@
+# SPDX-FileCopyrightText: (c) 2021-2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+- name: Stat /etc/apt/apt.conf.d/20auto-upgrades
+  register: _ubuntu_r_autoupgrades
+  ansible.builtin.stat:
+    path: /etc/apt/apt.conf.d/20auto-upgrades
+
+- name: Disable apt periodic update of package lists
+  when: _ubuntu_r_autoupgrades.stat.exists
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/apt/apt.conf.d/20auto-upgrades
+    regexp: '^APT::Periodic::Update-Package-Lists'
+    line: 'APT::Periodic::Update-Package-Lists "0";'
+
+- name: Disable apt periodic download of upgradable packages
+  when: _ubuntu_r_autoupgrades.stat.exists
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/apt/apt.conf.d/20auto-upgrades
+    regexp: '^APT::Periodic::Download-Upgradeable-Packages'
+    line: 'APT::Periodic::Download-Upgradeable-Packages "0";'
+
+- name: Disable apt periodic autoclean
+  when: _ubuntu_r_autoupgrades.stat.exists
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/apt/apt.conf.d/20auto-upgrades
+    regexp: '^APT::Periodic::AutocleanInterval'
+    line: 'APT::Periodic::AutocleanInterval "0";'
+
+- name: Disable apt auto upgrade
+  when: _ubuntu_r_autoupgrades.stat.exists
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/apt/apt.conf.d/20auto-upgrades
+    regexp: '^APT::Periodic::Unattended-Upgrade'
+    line: 'APT::Periodic::Unattended-Upgrade "0";'
+
+- name: Systemd disable service apt-daily-upgrade
+  become: true
+  ansible.builtin.systemd:
+    service: apt-daily-upgrade
+    enabled: false
+    masked: true
+
+- name: Stat apt ESM hook
+  register: _ubuntu_r_esmhook
+  ansible.builtin.stat:
+    path: /etc/apt/apt.conf.d/20apt-esm-hook.conf
+
+- name: Apt backup ESM hook
+  when: _ubuntu_r_esmhook.stat.exists
+  become: true
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/apt/apt.conf.d/20apt-esm-hook.conf
+    dest: /etc/apt/apt.conf.d/20apt-esm-hook.conf.bak
+    force: false
+
+- name: Apt disable ESM hook
+  when: _ubuntu_r_esmhook.stat.exists
+  become: true
+  ansible.builtin.copy:
+    content: ""
+    dest: /etc/apt/apt.conf.d/20apt-esm-hook.conf
+    force: true
+
+- name: Ubuntu pro query apt_news setting
+  register: apt_news
+  become: true
+  changed_when: false
+  failed_when: false
+  ansible.builtin.command:
+    cmd: pro config show apt_news
+
+- name: Ubuntu pro disable apt_news
+  when: "'apt_news True' in apt_news.stdout"
+  become: true
+  ansible.builtin.command:
+    cmd: pro config set apt_news=false

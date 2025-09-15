@@ -1,0 +1,51 @@
+# SPDX-FileCopyrightText: (c) 2021-2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+# download the gpg key and save with extension ".asc", which bypasses the need to dearmor.
+- name: Import docker gpg key
+  become: true
+  ansible.builtin.get_url:
+    url: https://download.docker.com/{{ ansible_system | lower }}/{{ ansible_distribution | lower }}/gpg
+    dest: /etc/apt/trusted.gpg.d/docker.asc
+    mode: u=rw,g=r,o=r
+
+- name: Apt add docker repository
+  register: dockerrepo
+  become: true
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/trusted.gpg.d/docker.asc] https://download.docker.com/{{ ansible_system | lower }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
+    update_cache: true
+
+- name: Apt install docker {{ docker_version if docker_version else 'latest' }}
+  become: true
+  ansible.builtin.apt:
+    pkg:
+      - docker-ce{{ '=' ~ docker_version if docker_version else '' }}
+      - docker-ce-cli{{ '=' ~ docker_version if docker_version else '' }}
+      - docker-ce-rootless-extras{{ '=' ~ docker_version if docker_version else '' }}
+      - docker-buildx-plugin{{ '=' ~ docker_buildx_version if docker_buildx_version else '' }}
+      - docker-compose-plugin{{ '=' ~ docker_compose_version if docker_compose_version else '' }}
+
+- name: Apt install docker module for python {{ docker_python_module_version if docker_python_module_version else 'latest' }}
+  become: true
+  ansible.builtin.apt:
+    pkg: python3-docker{{ '=' ~ docker_python_module_version if docker_python_module_version else '' }}
+
+- name: Add append docker group to {{ ansible_user }}
+  when: docker_add_user_to_docker_group
+  notify: "elgeeko1.linux.docker : reset_connection"
+  become: true
+  ansible.builtin.user:
+    name: "{{ ansible_user }}"
+    groups:
+      - docker
+    append: true
+
+- name: Controller flush handlers
+  ansible.builtin.meta: flush_handlers

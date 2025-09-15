@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: (c) 2021-2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+- name: Apt install aptitude and apt-transport-https
+  become: true
+  ansible.builtin.apt:
+    pkg:
+      - aptitude
+      - apt-transport-https
+    force_apt_get: true # aptitude may not be installed

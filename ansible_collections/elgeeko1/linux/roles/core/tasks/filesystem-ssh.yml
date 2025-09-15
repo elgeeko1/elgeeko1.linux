@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+- name: Ensure ~/.ssh exists with correct permissions
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.ssh"
+    state: directory
+    mode: u=rwx,g=,o=
+
+- name: Ensure ~/.ssh/config.d exists with correct permissions
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.ssh/config.d"
+    state: directory
+    mode: u=rwx,g=,o=
+
+- name: SSH config include ~/config.d/*.config
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_env.HOME }}/.ssh/config"
+    line: "Include config.d/*.config"
+    create: true
+    mode: u=rw,g=,o=
+
+- name: SSH config include ~/config.d/**/*.config
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_env.HOME }}/.ssh/config"
+    line: "Include config.d/**/*.config"
+    create: true
+    mode: u=rw,g=,o=

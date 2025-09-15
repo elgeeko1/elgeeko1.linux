@@ -1,0 +1,5 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+_git_gpg_export_dir: "{{ ansible_env.HOME }}/.cache"
+_git_gpg_key_name: "{{ git_github_username }}-{{ inventory_hostname }}"

@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: (c) 2021-2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+- name: Install qemu
+  become: true
+  ansible.builtin.apt:
+    pkg:
+      - qemu-user-static
+      - u-boot-qemu
+      - binfmt-support
+
+- name: Verify hello-world container
+  changed_when: false
+  community.docker.docker_container:
+    name: qemu-test-mips64le
+    image: hello-world
+    pull: true
+    detach: false
+    tty: true
+    auto_remove: true
+    cleanup: true
+    keep_volumes: false
+
+- name: Remove hello-world image
+  changed_when: false
+  community.docker.docker_image:
+    name: hello-world
+    state: absent
+    force_absent: true

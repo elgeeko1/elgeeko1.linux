@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+- name: Uninstall unused applications
+  ansible.builtin.import_tasks: unused-apps.yml
+
+- name: Disable problem reporting
+  ansible.builtin.import_tasks: problem-reporting.yml
+
+- name: Uninstall update notifications
+  ansible.builtin.import_tasks: update-notifier.yml
+
+- name: Add 'desktop' alias to .bash_aliases
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_env.HOME }}/.bash_aliases"
+    regexp: "^desktop=*"
+    line: "alias desktop='sudo systemctl isolate graphical.target'"
+    create: true
+    mode: u=rwx,g=rx,o=
+
+- name: Perform scheduled reboot
+  ansible.builtin.import_tasks: reboot.yml

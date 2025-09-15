@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: (c) 2021-2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+# configure the docker daemon for multiarchtecture builds?
+# installs qemu
+docker_multiarch: false
+
+# use containerd-snapshot for multiarchitecture builder?
+docker_multiarch_containerd_snapshot: false
+
+# when using containerd-snapshot, name of the builder to create
+docker_multiarch_containerd_builder_name: multiarch
+
+# add ansible user to docker group?
+docker_add_user_to_docker_group: true
+
+# perform a docker system prune?
+docker_prune: false
+
+## versions
+docker_version:
+docker_buildx_version:
+docker_compose_version:
+docker_python_module_version:

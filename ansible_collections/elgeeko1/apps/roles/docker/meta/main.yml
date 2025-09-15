@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: (c) 2021-2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+galaxy_info:
+  author: Jeff C. Jensen <11233838+elgeeko1@users.noreply.github.com>
+  description: "Install docker into Linux systems."
+  license: MIT
+  min_ansible_version: "2.16"
+  platforms:
+    - name: Ubuntu
+      versions: [jammy, noble]
+    - name: Debian
+      versions: [bullseye, bookworm]
+  galaxy_tags: [linux, core, baseline]
+
+collections:
+  - community.docker
+  - community.general

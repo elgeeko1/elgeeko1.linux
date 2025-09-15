@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: (c) 2021-2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+# removing these packages will remove the ubuntu-desktop metapackage
+# but not its dependencies. if the desktop metapackge is installed
+# again this will re-install the packages below.
+- name: Apt uninstall automatic updates and update notifier
+  become: true
+  notify: "elgeeko1.linux.ubuntu_desktop_ux : schedule_reboot"
+  ansible.builtin.apt:
+    state: absent
+    purge: true
+    autoremove: true
+    pkg:
+      - ubuntu-release-upgrader-gtk
+      - ubuntu-release-upgrader-core
+      - update-manager
+      - update-manager-core
+      - update-notifier
+      - update-notifier-common
+      - unattended-upgrades

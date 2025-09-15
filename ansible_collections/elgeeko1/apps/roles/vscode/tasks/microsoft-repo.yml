@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+- name: debconf add code/add-microsoft-repo
+  become: true
+  ansible.builtin.debconf:
+    name: code
+    question: add-microsoft-repo
+    value: "true"
+    vtype: "boolean"
+
+- name: Download Microsoft signing key
+  become: true
+  ansible.builtin.get_url:
+    url: https://packages.microsoft.com/keys/microsoft.asc
+    dest: /etc/apt/trusted.gpg.d/packages.microsoft.asc
+    mode: u=rw,g=r,o=r
+
+- name: Add apt repository
+  become: true
+  ansible.builtin.apt_repository:
+    repo: deb [signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.asc] https://packages.microsoft.com/repos/code stable main

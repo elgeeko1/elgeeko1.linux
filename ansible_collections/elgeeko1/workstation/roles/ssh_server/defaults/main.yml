@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+# remote host target user to use for user-scoped tasks.
+ssh_server_user: "{{ ansible_user
+  | default(ansible_ssh_user)
+  | default(lookup('ansible.builtin.env', 'USER')) }}"
+
+ssh_server_github_username:

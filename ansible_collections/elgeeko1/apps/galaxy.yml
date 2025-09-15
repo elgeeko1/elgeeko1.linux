@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+namespace: elgeeko1
+name: apps
+version: 1.2.0
+readme: README.md
+authors:
+  - Jeff C. Jensen <11233838+elgeeko1@users.noreply.github.com>
+description: "Linux apps collection."
+license:
+  - MIT
+  - BSD-3-Clause
+tags: [linux, apps, ubuntu]
+dependencies: {}
+repository: https://github.com/elgeeko1/elgeeko1.linux
+issues: https://github.com/elgeeko1/elgeeko1.linux/issues
+build_ignore:
+  - .ansible
+  - .git
+  - .github
+  - .pytest_cache
+  - .venv
+  - .vscode

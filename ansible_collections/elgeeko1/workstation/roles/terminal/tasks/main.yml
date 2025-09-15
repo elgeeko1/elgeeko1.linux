@@ -1,0 +1,29 @@
+---
+- name: Append password-less sudoers with user '{{ terminal_user }}'
+  become: true
+  community.general.sudoers:
+    name: "{{ terminal_user }}"
+    user: "{{ terminal_user }}"
+    commands: ALL
+    host: ALL
+    runas: ALL:ALL
+    nopassword: true
+
+- name: Add 'update' alias to .bash_aliases
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_env.HOME }}/.bash_aliases"
+    regexp: "^update=*"
+    line: "alias update='sudo apt update -q \
+              && sudo apt upgrade -y -q \
+              && sudo apt dist-upgrade -y -q \
+              && sudo apt autoremove -y -q \
+              && sudo snap refresh'"
+    create: true
+    mode: u=rwx,g=rx,o=
+
+- name: Append '/' to symlink directories
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    regexp: "^bind 'set mark-symlinked-directories*'"
+    line: "bind 'set mark-symlinked-directories on'"
+    create: false

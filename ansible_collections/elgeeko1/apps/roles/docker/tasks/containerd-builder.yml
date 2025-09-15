@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText: (c) 2021-2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT 
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+- name: Create .docker folder
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.docker"
+    state: directory
+    mode: u=rwx,g=rx,o=
+
+- name: Docker check for running builder {{ docker_multiarch_containerd_builder_name }}
+  register: _docker_r_multiarch_running
+  changed_when: false
+  failed_when: false
+  ignore_errors: true
+  ansible.builtin.shell: "docker buildx inspect {{ docker_multiarch_containerd_builder_name }} | grep running"
+
+- name: Docker remove orphaned builder {{ docker_multiarch_containerd_builder_name }}
+  when: _docker_r_multiarch_running.rc != 0
+  register: result
+  changed_when: result.rc == 0
+  failed_when: false
+  ignore_errors: true
+  ansible.builtin.shell: "docker buildx rm --force {{ docker_multiarch_containerd_builder_name }}"
+
+- name: Docker create builder {{ docker_multiarch_containerd_builder_name }}
+  when: _docker_r_multiarch_running.rc != 0
+  ansible.builtin.command:
+    cmd: >
+      docker buildx create
+        --name {{ docker_multiarch_containerd_builder_name }}
+        --use
+        --driver docker-container
+        --bootstrap
+
+- name: Docker inspect builder {{ docker_multiarch_containerd_builder_name }}
+  when: _docker_r_multiarch_running.rc != 0
+  changed_when: false
+  ansible.builtin.shell: "docker buildx inspect {{ docker_multiarch_containerd_builder_name }} | grep running"

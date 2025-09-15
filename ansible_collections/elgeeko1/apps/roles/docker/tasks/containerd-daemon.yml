@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: (c) 2021-2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+- name: Touch daemon.json
+  become: true
+  ansible.builtin.file:
+    path: /etc/docker/daemon.json
+    state: touch
+    modification_time: preserve
+    access_time: preserve
+    mode: u=rw,g=rw,o=r
+
+- name: Load daemon.json
+  register: _docker_r_daemon_original
+  ansible.builtin.slurp:
+    src: /etc/docker/daemon.json
+
+- name: Set fact _docker_r_daemon_original
+  ansible.builtin.set_fact:
+    _docker_r_daemon_original: "{{ (_docker_r_daemon_original['content'] | length > 0)
+      | ternary(_docker_r_daemon_original.content | b64decode, '{}') | from_json }}"
+
+- name: Append containerd-snapshotter to daemon configuration
+  ansible.builtin.set_fact:
+    docker_daemon_updated: "{{ _docker_r_daemon_original | combine(
+        {
+          'features':
+            {
+              'containerd-snapshotter': true
+            }
+        }) }}"
+
+- name: Write daemon.json
+  when: docker_daemon_updated != _docker_r_daemon_original
+  register: _docker_r_daemon_file
+  become: true
+  ansible.builtin.copy: 
+    content: "{{ docker_daemon_updated | to_nice_json }}" 
+    dest: /etc/docker/daemon.json
+    backup: true
+    force: true
+    mode: u=rw,g=rw,o=r
+
+- name: Restart docker service to apply new daemon configuration
+  when: _docker_r_daemon_file.changed
+  become: true
+  ansible.builtin.service:
+    name: docker
+    state: "{{ _docker_r_daemon_file.changed | ternary('restarted', 'started') }}"

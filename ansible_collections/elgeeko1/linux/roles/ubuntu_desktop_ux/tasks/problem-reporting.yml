@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: (c) 2021-2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+- name: Query gnome technical problems setting
+  register: _ubuntu_desktop_ux_r_technical_problems
+  changed_when: false
+  ansible.builtin.command: |
+    gsettings get org.gnome.desktop.privacy report-technical-problems
+
+- name: Gnome disable technical reports
+  when: _ubuntu_desktop_ux_r_technical_problems.stdout != "false"
+  notify: "schedule_reboot"
+  ansible.builtin.command: |
+    gsettings set org.gnome.desktop.privacy report-technical-problems false
+
+# crash reports may occur during first bringup of a virtual desktop
+# or during reconfiguration of services. as these are one-time and
+# related to configuring, they may be removed to prevent a crash
+# report from being the first window that appears on initial startup.
+- name: Clear /var/crash/
+  become: true
+  changed_when: false
+  ansible.builtin.command:
+    cmd: rm -rf /var/crash/*

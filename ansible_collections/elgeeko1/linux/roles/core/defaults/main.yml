@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: (c) 2021-2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+# Remote host target user to use for user-scoped tasks.
+core_target_user: "{{ ansible_user
+  | default(ansible_ssh_user)
+  | default(lookup('ansible.builtin.env', 'USER')) }}"
+
+# Timezone code (e.g. America/Los_Angeles)
+core_timezone:
+
+# Install and enable NTP service?
+core_ntp_enabled: true
+
+# Upgrade apt packages with this role?
+# values: no, always, once
+core_apt_upgrade_state: "once"
+
+# version of python package to install (e.g. 3.12)
+core_python_version:
+
+# Snapshot to use for ubuntu archives. Follows `YYYYMMDDTHHMMSSZ` format,
+# for example `20230302T030400Z` for 03:04 UTC on 2 March 2023.
+# Defaults to empty (do not configure snapshots).
+core_apt_snapshot:

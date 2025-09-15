@@ -1,0 +1,50 @@
+# SPDX-FileCopyrightText: (c) 2021-2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+- name: Query services
+  ansible.builtin.service_facts:
+
+- name: Stop and disable error reporting service service
+  with_items: "{{
+      (['apport'] if 'apport' in services else [])
+      + (['whoopsie'] if 'whoopsie' in services else [])
+    }}"
+  notify: "elgeeko1.linux.ubuntu : schedule_reboot"
+  become: true
+  ansible.builtin.service:
+    name: apport
+    state: stopped
+    enabled: false
+
+- name: Stat apport configuration
+  register: _ubuntu_r_apport
+  ansible.builtin.stat:
+    path: /etc/default/apport
+
+- name: Disable apport configuration
+  when: _ubuntu_r_apport.stat.exists
+  become: true
+  notify: "elgeeko1.linux.ubuntu : schedule_reboot"
+  ansible.builtin.lineinfile:
+    path: /etc/default/apport
+    regexp: '^enabled='
+    line: 'enabled=0'
+    state: present
+
+- name: Apt remove whoopsie and apport
+  become: true
+  notify: "elgeeko1.linux.ubuntu : schedule_reboot"
+  ansible.builtin.apt:
+    state: absent
+    purge: true
+    autoremove: true
+    pkg:
+      - apport
+      - whoopsie
+      - ubuntu-report

@@ -1,0 +1,8 @@
+---
+profile: production
+
+skip_list:
+#  - name[casing]
+#  - name[template]
+#  - name[no-role-prefix]
+#  - ignore-errors

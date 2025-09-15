@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+- name: Apt update cache
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600 # 1 hr
+
+- name: Configure message of the day (motd)
+  when: ubuntu_trim_motd
+  ansible.builtin.include_tasks: login-motd.yml
+
+- name: Apt disable unattended upgrades
+  when: ubuntu_disable_unattended_upgrades
+  ansible.builtin.include_tasks: unattended-upgrades.yml
+
+- name: Disable error reporting
+  when: ubuntu_disable_error_reporting
+  ansible.builtin.include_tasks: error-reporting.yml
+
+- name: Disable Ubuntu Pro
+  when: ubuntu_disable_pro
+  become: true
+  notify: "elgeeko1.linux.ubuntu : schedule_reboot"
+  ansible.builtin.apt:
+    state: absent
+    purge: true
+    autoremove: true
+    pkg:
+      - ubuntu-pro-client-l10n
+      - ubuntu-pro-client
+
+- name: Reboot
+  ansible.builtin.import_tasks: reboot.yml

@@ -1,0 +1,67 @@
+# SPDX-FileCopyrightText: (c) 2021-2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+- name: Configure user cache directory
+  ansible.builtin.import_tasks: filesystem-cache.yml
+
+- name: Configure user SSH directory
+  ansible.builtin.import_tasks: filesystem-ssh.yml
+
+- name: Apt update cache
+  when: ansible_distribution == "Ubuntu"
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600 # 1 hr
+    force_apt_get: true # aptitude may not be installed
+
+- name: Apt install apt dependencies
+  when: ansible_distribution == "Ubuntu"
+  ansible.builtin.import_tasks: apt-deps.yml
+
+# must be installed before snapshots may be used
+- name: Package install ca-certificates and software-properties-common
+  become: true
+  ansible.builtin.package:
+    pkg:
+      - ca-certificates
+      - software-properties-common
+
+- name: Configure snapshots for all repositories that support them
+  when:
+    - core_apt_snapshot | default(false, true) | bool
+    - ansible_distribution == "Ubuntu"
+  register: _core_r_shapshot
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/50snapshot
+    content: "{{ ('APT::Snapshot \"' ~ core_apt_snapshot ~ '\";') if core_apt_snapshot else '' }}"
+    mode: u=rw,g=r,o=r
+
+- name: Apt update cache to apply snapshot change
+  when: ansible_distribution == "Ubuntu"
+  become: true
+  ansible.builtin.apt:
+    update_cache: "{{ _core_r_shapshot.changed }}"
+
+- name: Apt upgrade
+  when: ansible_distribution == "Ubuntu"
+  ansible.builtin.import_tasks: apt-upgrade.yml
+
+- name: Install Python
+  ansible.builtin.import_tasks: python.yml
+
+- name: Install Ansible dependencies
+  ansible.builtin.import_tasks: ansible-deps.yml
+
+- name: Configure timezone and ntp
+  ansible.builtin.import_tasks: time.yml
+
+- name: Perform scheduled reboot
+  ansible.builtin.import_tasks: reboot.yml

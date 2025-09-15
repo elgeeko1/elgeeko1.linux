@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+- name: Install git tools
+  become: true
+  ansible.builtin.package:
+    name:
+      - git
+      - git-crypt
+
+- name: Configure git core.editor = {{ git_editor }}
+  community.general.git_config:
+    name: core.editor
+    scope: global
+    value: "{{ git_editor }}"
+
+- name: Configure git pull.default = rebase
+  community.general.git_config:
+    name: pull.default
+    scope: global
+    value: rebase
+
+- name: Configure git pull.rebase = true
+  community.general.git_config:
+    name: pull.rebase
+    scope: global
+    value: true
+
+- name: Configure git init.defaultBranch = main
+  community.general.git_config:
+    name: init.defaultBranch
+    scope: global
+    value: main
+
+- name: Configure git user.name = {{ git_github_username }}
+  community.general.git_config:
+    name: user.name
+    scope: global
+    value: "{{ git_github_username }}"
+
+- name: Configure git user.email = {{ git_github_email }}
+  community.general.git_config:
+    name: user.email
+    scope: global
+    value: "{{ git_github_email }}"

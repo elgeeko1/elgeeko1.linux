@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: (c) 2021-2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+- name: Controller flush handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Query restart required
+  register: _ubuntu_desktop_ux_r_reboot
+  ansible.builtin.stat:
+    path: /var/run/reboot-required
+
+- name: Reboot
+  when:
+    - _ubuntu_desktop_ux_r_reboot.stat.exists
+    - inventory_hostname != "localhost"
+    - (ansible_connection | default('smart')) != 'local'
+  become: true
+  ansible.builtin.reboot:
+    msg: "elgeeko1.linux.ubuntu_desktop_ux : reboot"

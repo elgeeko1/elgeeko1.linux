@@ -1,0 +1,106 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+- name: Install GnuPG
+  become: true
+  ansible.builtin.package:
+    name: gnupg
+
+- name: Check if a gpg secret key already exists for {{ git_github_email }}
+  register: _git_r_gpg_key_list
+  changed_when: false
+  failed_when: false
+  ansible.builtin.command:
+    cmd: "gpg --batch --with-colons --list-secret-keys {{ git_github_email }}"
+
+- name: Set fact _git_r_gpg_key_exists
+  ansible.builtin.set_fact:
+    _git_r_gpg_key_exists: "{{ _git_r_gpg_key_list.stdout | regex_search('^sec') is not none }}"
+
+- name: Build non-interactive ed25519 gpg key-parameter file
+  ansible.builtin.copy:
+    dest: "{{ _git_gpg_export_dir }}/{{ _git_gpg_key_name }}.keybatch"
+    mode: u=rw,g=,o=
+    content: |
+      %no-protection
+      Key-Type: eddsa
+      Key-Curve: ed25519
+      Subkey-Type: eddsa
+      Subkey-Curve: ed25519
+      Name-Real: {{ git_github_username }}
+      Name-Email: {{ git_github_email }}
+      Name-Comment: {{ _git_gpg_key_name }}
+      Expire-Date: 0
+      %commit
+
+- name: Generate gpg key
+  when: not _git_r_gpg_key_exists
+  register: _git_r_gpg_generate
+  changed_when: "'key generation completed' in _git_r_gpg_generate.stderr"
+  ansible.builtin.command:
+    cmd: "gpg --batch --generate-key {{ _git_gpg_export_dir }}/{{ _git_gpg_key_name }}.keybatch"
+
+- name: List keys of the gpg key
+  register: _git_gpg_list
+  changed_when: false
+  ansible.builtin.command:
+    cmd: "gpg --batch --with-colons --list-secret-keys {{ git_github_email }}"
+
+- name: Extract gpg fingerprint of first key
+  ansible.builtin.set_fact:
+    _git_r_gpg_fingerprint: "{{ (_git_gpg_list.stdout_lines | select('match','^fpr') | list).0.split(':')[9] }}"
+
+- name: Export armoured public gpg key
+  register: _git_r_gpg_key_export
+  changed_when: false
+  ansible.builtin.shell:
+    cmd: "gpg --armor --export {{ _git_r_gpg_fingerprint }}"
+
+- name: Write armoured public gpg key to {{ _git_gpg_export_dir }}
+  ansible.builtin.copy:
+    dest: "{{ _git_gpg_export_dir }}/{{ _git_gpg_key_name }}.asc"
+    content: "{{ _git_r_gpg_key_export.stdout }}"
+    mode: u=rw,g=,o=
+
+- name: Configure Git to sign with this gpg key
+  community.general.git_config:
+    name: user.signingkey
+    value: "{{ _git_r_gpg_fingerprint }}"
+    scope: global
+
+- name: Configure Git to sign commits
+  community.general.git_config:
+    name: commit.gpgsign
+    value: "true"
+    scope: global
+
+- name: Configure Git to sign tags
+  community.general.git_config:
+    name: tag.gpgsign
+    value: "true"
+    scope: global
+
+- name: Set GPG_TTY in .bashrc
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    regexp: "^export GPG_TTY*'"
+    line: "export GPG_TTY=$(tty)"
+    create: false
+
+- name: Ensure controller local folder for gpg public keys
+  delegate_to: localhost
+  run_once: true
+  ansible.builtin.file:
+    path: "{{ playbook_dir ~ '/keys/gpg' }}"
+    state: directory
+    mode: u=rwx,g=,o=
+
+# Copy the ASCII-armored public key from each host to the controller
+# Remote file: {{ _git_gpg_export_dir }}/{{ _git_gpg_key_name }}.asc
+# Local file:  <playbook_dir>/keys/gpg/{{ _git_gpg_key_name }}.asc
+- name: Controller pull public gpg key {{ _git_gpg_key_name }}
+  ansible.builtin.fetch:
+    src: "{{ _git_gpg_export_dir }}/{{ _git_gpg_key_name }}.asc"
+    dest: "{{ playbook_dir ~ '/keys/gpg' }}/"
+    flat: true
+    fail_on_missing: true

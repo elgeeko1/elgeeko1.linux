@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+- name: Install VS Code extensions
+  with_items: "{{ vscode_extensions }}"
+  register: _vscode_r_extension_install
+  changed_when: "'successfully installed' in _vscode_r_extension_install.stdout"
+  failed_when:
+    - _vscode_r_extension_install.rc != 0
+    - "'is already installed' not in _vscode_r_extension_install.stdout"
+  ansible.builtin.command:
+    cmd: code --install-extension {{ item }}
+
+- name: Create directory ~/.vscode-server
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.vscode-server"
+    state: directory
+    mode: u=rwx,g=rx,o=
+
+- name: Install VS Code server extensions
+  with_items: "{{ vscode_extensions }}"
+  register: _vscode_r_extension_install
+  changed_when: "'successfully installed' in _vscode_r_extension_install.stdout"
+  failed_when:
+    - _vscode_r_extension_install.rc != 0
+    - "'is already installed' not in _vscode_r_extension_install.stdout"
+  ansible.builtin.command:
+    cmd: >-
+      code
+      --extensions-dir {{ ansible_env.HOME }}/.vscode-server/extensions
+      --install-extension {{ item }}

@@ -1,0 +1,59 @@
+# SPDX-FileCopyrightText: (c) 2021-2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+- name: Remove help message of the day
+  become: true
+  ansible.builtin.file:
+    path: /etc/update-motd.d/10-help-text
+    state: absent
+
+- name: Set news message of the day to empty
+  become: true
+  ansible.builtin.copy:
+    content: "#!/bin/sh"
+    dest: /etc/update-motd.d/50-motd-news
+    force: true
+    mode: 0755
+
+- name: Remove contract-us-esm message of the day
+  become: true
+  ansible.builtin.file:
+    path: /etc/update-motd.d/91-contract-ua-esm-status
+    state: absent
+
+- name: Remove release-upgrade message of the day
+  become: true
+  ansible.builtin.file:
+    path: /etc/update-motd.d/91-release-upgrade
+    state: absent
+
+- name: Remove unattended upgrades message of the day
+  become: true
+  ansible.builtin.file:
+    path: /etc/update-motd.d/92-unattended-upgrades
+    state: absent
+
+- name: Remove HWE EOL message of the day
+  become: true
+  ansible.builtin.file:
+    path: /etc/update-motd.d/95-hwe-eol
+    state: absent
+
+- name: Stat /etc/default/motd-news
+  register: _ubuntu_r_motd
+  ansible.builtin.stat:
+    path: /etc/default/motd-news
+
+- name: Disable dynamic motd-news
+  when: _ubuntu_r_motd.stat.exists
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/default/motd-news
+    regexp: "^ENABLED=1"
+    line: "ENABLED=0"
