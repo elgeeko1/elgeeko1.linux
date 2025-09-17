@@ -9,8 +9,8 @@
 ---
 - name: Install qemu
   become: true
-  ansible.builtin.apt:
-    pkg:
+  ansible.builtin.package:
+    name:
       - qemu-user-static
       - u-boot-qemu
       - binfmt-support

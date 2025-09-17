@@ -16,7 +16,6 @@
     mode: u=rw,g=r,o=r
 
 - name: Apt add docker repository
-  register: dockerrepo
   become: true
   ansible.builtin.apt_repository:
     repo: "deb [signed-by=/etc/apt/trusted.gpg.d/docker.asc] https://download.docker.com/{{ ansible_system | lower }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
