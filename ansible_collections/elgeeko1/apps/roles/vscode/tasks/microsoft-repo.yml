@@ -22,7 +22,7 @@
     dest: /etc/apt/trusted.gpg.d/packages.microsoft.asc
     mode: u=rw,g=r,o=r
 
-- name: Add apt repository
-  become: true
-  ansible.builtin.apt_repository:
-    repo: deb [signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.asc] https://packages.microsoft.com/repos/code stable main
+# - name: Add apt repository
+#   become: true
+#   ansible.builtin.apt_repository:
+#     repo: deb [signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.asc] https://packages.microsoft.com/repos/code stable main

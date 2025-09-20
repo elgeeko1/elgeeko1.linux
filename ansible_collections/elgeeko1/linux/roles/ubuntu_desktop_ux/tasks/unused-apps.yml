@@ -34,16 +34,3 @@
   community.general.snap:
     name: thunderbird
     state: absent
-
-- name: Apt uninstall keyring and sssd
-  become: true
-  notify: "elgeeko1.linux.ubuntu_desktop_ux : schedule_reboot"
-  ansible.builtin.apt:
-    state: absent
-    purge: true
-    autoremove: true
-    pkg:
-      - gnome-keyring
-      - gnome-keyring-pkcs11
-      - libpam-gnome-keyring
-      - sssd

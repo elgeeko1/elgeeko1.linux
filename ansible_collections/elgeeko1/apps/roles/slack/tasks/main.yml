@@ -1,0 +1,8 @@
+---
+- name: Install Slack (snap)
+  become: true
+  community.general.snap:
+    name: slack
+    channel: stable
+    classic: true
+    state: present

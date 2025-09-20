@@ -1,0 +1,29 @@
+[selection]
+save_to_clipboard = true
+
+[window]
+dynamic_title = true
+dimensions = { columns = 120, lines = 40 }
+
+[cursor]
+style = { shape = "Beam", blinking = "On" }
+
+[env]
+TERM = "xterm-256color"
+COLORTERM = "truecolor"
+
+[font]
+normal = { family = "Ubuntu Mono", style = "Regular" }
+bold = { family = "Ubuntu Mono", style = "Bold" }
+italic = { family = "Ubuntu Mono", style = "Italic" }
+size = 11.0
+
+[[keyboard.bindings]]
+key = "V"
+mods = "Control|Shift"
+action = "Paste"
+
+[[keyboard.bindings]]
+key = "C"
+mods = "Control|Shift"
+action = "Copy"
