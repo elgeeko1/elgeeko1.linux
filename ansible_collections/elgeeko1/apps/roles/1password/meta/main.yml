@@ -11,7 +11,7 @@ galaxy_info:
       versions: [jammy, noble]
     - name: Debian
       versions: [bullseye, bookworm]
-  galaxy_tags: [linux, core, baseline]
+  galaxy_tags: [linux, apps, 1password]
 
 collections:
   - community.general

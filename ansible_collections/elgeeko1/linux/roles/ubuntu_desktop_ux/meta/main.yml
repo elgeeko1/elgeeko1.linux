@@ -17,7 +17,7 @@ galaxy_info:
       versions: [jammy, noble]
     - name: Debian
       versions: [bullseye, bookworm]
-  galaxy_tags: [linux, core, desktop, ux]
+  galaxy_tags: [linux, core, ubuntu, desktop, ux]
 
 collections:
   - ansible.posix

@@ -11,7 +11,7 @@ galaxy_info:
       versions: [jammy, noble]
     - name: Debian
       versions: [bullseye, bookworm]
-  galaxy_tags: [linux, workstation]
+  galaxy_tags: [linux, workstation, git]
 
 collections:
   - community.general
