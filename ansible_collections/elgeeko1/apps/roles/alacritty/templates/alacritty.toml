@@ -1,3 +1,18 @@
+{# OS default monospace:
+   - Debian/Ubuntu: Ubuntu Mono
+   - Windows: Consolas
+   - macOS: Menlo #}
+{% set osfam = ansible_facts.os_family | default('') %}
+{% if osfam == 'Windows' %}
+  {% set font_family = 'Consolas' %}
+{% elif osfam == 'Darwin' %}
+  {% set font_family = 'Menlo' %}
+{% elif osfam == 'Debian' %}
+  {% set font_family = 'Ubuntu Mono' %}
+{% else %}
+  {% set font_family = 'Courier New' %}
+{% endif %}
+
 [selection]
 save_to_clipboard = true
 
@@ -13,11 +28,13 @@ TERM = "xterm-256color"
 COLORTERM = "truecolor"
 
 [font]
-normal = { family = "Ubuntu Mono", style = "Regular" }
-bold = { family = "Ubuntu Mono", style = "Bold" }
-italic = { family = "Ubuntu Mono", style = "Italic" }
-size = 11.0
+normal = { family = "{{ font_family }}", style = "Regular" }
+bold = { family = "{{ font_family }}", style = "Bold" }
+italic = { family = "{{ font_family }}", style = "Italic" }
+size = 12.0
+builtin_box_drawing = true
 
+# copy/paste (Ctrl+Shift+C/V) everywhere
 [[keyboard.bindings]]
 key = "V"
 mods = "Control|Shift"
@@ -27,3 +44,48 @@ action = "Paste"
 key = "C"
 mods = "Control|Shift"
 action = "Copy"
+
+# copy/paste (Cmd+C/V) everywhere
+[[keyboard.bindings]]
+key = "C"
+mods = "Command"
+action = "Copy"
+
+[[keyboard.bindings]]
+key = "V"
+mods = "Command"
+action = "Paste"
+
+[colors]
+draw_bold_text_with_bright_colors = true
+
+%{ if osfam == 'Darwin' %}
+# map alacritty terminal colors to Ubuntu/tango palatte
+[colors.primary]
+background = "#300A24"  # Ubuntu terminal-esque dark purple
+foreground = "#EEEEEC"
+
+[colors.normal]
+black   = "#2E3436"
+red     = "#CC0000"
+green   = "#4E9A06"
+yellow  = "#C4A000"
+blue    = "#3465A4"
+magenta = "#75507B"
+cyan    = "#06989A"
+white   = "#D3D7CF"
+
+[colors.bright]
+black   = "#555753"
+red     = "#EF2929"
+green   = "#8AE234"
+yellow  = "#FCE94F"
+blue    = "#729FCF"
+magenta = "#AD7FA8"
+cyan    = "#34E2E2"
+white   = "#EEEEEC"
+
+[colors.cursor]
+text = "CellBackground"
+cursor = "CellForeground"
+{% endif %}
