@@ -59,7 +59,6 @@ action = "Paste"
 [colors]
 draw_bold_text_with_bright_colors = true
 
-{% if osfam == 'Darwin' %}
 # map alacritty terminal colors to Ubuntu/tango palatte
 [colors.primary]
 background = "#300A24"  # Ubuntu terminal-esque dark purple
@@ -88,4 +87,4 @@ white   = "#EEEEEC"
 [colors.cursor]
 text = "CellBackground"
 cursor = "CellForeground"
-{% endif %}
+
