@@ -1,0 +1,31 @@
+---
+- name: Download Google Linux signing key
+  become: true
+  ansible.builtin.get_url:
+    url: https://dl.google.com/linux/linux_signing_key.pub
+    dest: /etc/apt/keyrings/google-linux-signing-key.pub
+    mode: "0644"
+
+- name: Dearmor GPG signing key
+  become: true
+  ansible.builtin.command:
+    cmd: >
+      gpg --dearmor
+      --output /etc/apt/keyrings/google-linux-signing.gpg
+      /etc/apt/keyrings/google-linux-signing-key.pub
+  args:
+    creates: /etc/apt/keyrings/google-linux-signing.gpg
+
+- name: Add Google Chrome APT repository
+  become: true
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [arch=amd64 signed-by=/etc/apt/keyrings/google-linux-signing.gpg]
+      https://dl.google.com/linux/chrome/deb/ stable main
+    filename: google-chrome
+
+- name: Install Google Chrome
+  become: true
+  ansible.builtin.apt:
+    name: "google-chrome-stable"
+    state: present

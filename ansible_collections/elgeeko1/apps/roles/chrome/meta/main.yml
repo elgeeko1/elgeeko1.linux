@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+galaxy_info:
+  author: Jeff C. Jensen <11233838+elgeeko1@users.noreply.github.com>
+  description: "Install Google Chrome into Linux systems."
+  license: MIT
+  min_ansible_version: "2.16"
+  platforms:
+    - name: Ubuntu
+      versions: [jammy, noble]
+    - name: Debian
+      versions: [bullseye, bookworm]
+  galaxy_tags: [linux, apps, alacritty]
+
+collections:
+  - community.general
