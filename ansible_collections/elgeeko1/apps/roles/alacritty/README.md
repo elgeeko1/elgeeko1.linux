@@ -9,6 +9,16 @@
 
 ### multiarchitecture builds
 
-- `alacritty_config_template`: Configuration template file to deploy from the controller.
+- `alacritty_config_template`: Alacritty configuration template file to deploy from the controller.
 
-  Default: use role-provided template.
+  Default: use `alacritty.toml` from this role.
+
+#### tmux
+
+- `alacritty_tmux_enabled`: configure Alacritty to use tmux.
+
+  Default: `true`.
+
+- `alacritty_tmux_config_template`: tmux configuration template file to deploy from the controller.
+
+  Default: use `tmux.conf` from this role.

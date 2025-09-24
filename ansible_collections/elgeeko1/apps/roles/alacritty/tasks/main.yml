@@ -12,9 +12,13 @@
     state: directory
     mode: u=rwx,g=,o=
 
-- name: Deploy configuration template
+- name: Deploy Alacritty configuration
   when: alacritty_config_template | length > 0
   ansible.builtin.template:
     src: "{{ alacritty_config_template }}"
     dest: "{{ ansible_env.HOME }}/.config/alacritty/"
     mode: u=rw,g=,o=
+
+- name: Configure tmux
+  when: alacritty_tmux_enabled
+  ansible.builtin.import_tasks: tmux.yml

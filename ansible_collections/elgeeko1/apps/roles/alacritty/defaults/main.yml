@@ -2,3 +2,5 @@
 # SPDX-License-Identifier: MIT
 ---
 alacritty_config_template: alacritty.toml
+alacritty_tmux_config_template: tmux.conf
+alacritty_tmux_enabled: true

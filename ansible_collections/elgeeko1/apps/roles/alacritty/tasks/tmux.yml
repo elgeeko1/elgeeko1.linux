@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+- name: Install tmux
+  become: true
+  ansible.builtin.package:
+    name: tmux
+
+- name: Deploy tmux configuration
+  ansible.builtin.template:
+    src: tmux.conf
+    dest: "{{ ansible_env.HOME }}/.tmux.conf"
+    mode: u=rw,g=,o=
