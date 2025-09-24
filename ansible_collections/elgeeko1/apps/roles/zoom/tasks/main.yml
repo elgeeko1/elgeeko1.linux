@@ -1,0 +1,16 @@
+---
+- name: Download Zoom .deb {{ zoom_version }}
+  ansible.builtin.get_url:
+    url: "{{ _zoom_deb_url }}"
+    dest: "{{ _zoom_deb_path }}"
+    mode: u=rw,g=r,o=r
+    force: true
+
+- name: Install Zoom
+  become: true
+  ansible.builtin.apt:
+    deb: "{{ _zoom_deb_path }}"
+
+- name: Disable autostart
+  when: zoom_disable_autostart
+  ansible.builtin.import_tasks: disable_autostart.yml
