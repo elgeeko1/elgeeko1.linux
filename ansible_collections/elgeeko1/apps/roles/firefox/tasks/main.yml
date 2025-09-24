@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+- name: Install LaunchPad PPA keys
+  ansible.builtin.import_tasks: launchpad.yml
+
+- name: Add Mozilla Team apt source
+  register: _firefox_deb
+  become: true
+  ansible.builtin.deb822_repository:
+    name: mozillateam
+    types: [deb]
+    uris: ["https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu"]
+    suites: ["{{ ansible_distribution_release }}"]
+    components: ["main"]
+    signed_by: "/etc/apt/keyrings/launchpad-ppa.gpg /etc/apt/keyrings/launchpad-ppa-old.gpg"
+
+- name: Apt update cache
+  become: true
+  ansible.builtin.apt:
+    update_cache: "{{ _firefox_deb.changed }}"
+
+- name: Pin deb over snap for Firefox
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/apt/preferences.d/mozilla-firefox
+    mode: u=rw,g=r,o=r
+    content: |
+      Package: firefox*
+      Pin: release o=LP-PPA-mozillateam
+      Pin-Priority: 501
+
+- name: Configure unattended upgrades for Mozilla PPA
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/apt/apt.conf.d/51unattended-upgrades-firefox
+    create: true
+    mode: u=rw,g=r,o=r
+    line: 'Unattended-Upgrade::Allowed-Origins:: "LP-PPA-mozillateam:${distro_codename}";'
+
+- name: Remove Firefox snap package
+  become: true
+  community.general.snap:
+    name: firefox
+    state: absent
+
+- name: Install Firefox apt package
+  become: true
+  ansible.builtin.apt:
+    name: firefox
+    state: "{{ _firefox_deb.changed | ternary('latest', 'present') }}"
+
+- name: Set Firefox as default Gnome browser
+  when: _firefox_set_default_browser
+  ansible.builtin.import_tasks: default_browser.yml

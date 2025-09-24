@@ -1,0 +1,37 @@
+---
+# manage the dual signing period for Launchpad PPAs
+
+# Manage the dual-signing period for Launchpad PPAs using a loop
+
+- name: Fetch Launchpad PPA keys (ASCII)
+  loop:
+    - { name: "launchpad-ppa",     url: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xAEBDF4819BE21867" }
+    - { name: "launchpad-ppa-old", url: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x9BDB3D89CE49EC21" }
+  register: _firefox_launchpad_keys
+  become: true
+  ansible.builtin.get_url:
+    url: "{{ item.url }}"
+    dest: "/etc/apt/keyrings/{{ item.name }}.asc"
+    mode: u=rw,g=r,o=r
+
+- name: Dearmor Launchpad PPA keys
+  loop:
+    - { name: "launchpad-ppa" }
+    - { name: "launchpad-ppa-old" }
+  become: true
+  ansible.builtin.shell: >
+    gpg --dearmor
+    --output /etc/apt/keyrings/{{ item.name }}.gpg
+    /etc/apt/keyrings/{{ item.name }}.asc
+  args:
+    creates: "/etc/apt/keyrings/{{ item.name }}.gpg"
+
+- name: Set permissions on Launchpad PPA keyrings
+  loop:
+    - { name: "launchpad-ppa" }
+    - { name: "launchpad-ppa-old" }
+  become: true
+  ansible.builtin.file:
+    path: "/etc/apt/keyrings/{{ item.name }}.gpg"
+    mode: u=rw,g=r,o=r
+    state: file

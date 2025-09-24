@@ -1,0 +1,48 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+- name: Set system default browser to Firefox (update-alternatives)
+  become: true
+  ansible.builtin.alternatives:
+    name: x-www-browser
+    path: /usr/bin/firefox
+
+- name: Ensure ~/.config exists
+  ansible.builtin.file:
+    path: ~/.config
+    state: directory
+    mode: u=rwx,g=rx,o=rx
+
+- name: Make Firefox the GNOME default browser (mime associations)
+  ansible.builtin.blockinfile:
+    path: ~/.config/mimeapps.list
+    create: true
+    mode: u=rw,g=r,o=r
+    marker: "; {mark} ANSIBLE firefox defaults"
+    block: |
+      [Default Applications]
+      text/html=firefox.desktop
+      x-scheme-handler/http=firefox.desktop
+      x-scheme-handler/https=firefox.desktop
+      x-scheme-handler/about=firefox.desktop
+      x-scheme-handler/unknown=firefox.desktop
+
+- name: Query current default browser (xdg-settings)
+  register: _firefox_xdg_get
+  changed_when: false
+  failed_when: false
+  ansible.builtin.command: xdg-settings get default-web-browser
+  environment:
+    XDG_CURRENT_DESKTOP: GNOME
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ ansible_user_id }}/bus"
+    DISPLAY: ":0"
+
+- name: Set Firefox as default browser (xdg-settings)
+  when: _firefox_xdg_get.stdout | trim != 'firefox.desktop'
+  changed_when: true
+  failed_when: false
+  ansible.builtin.command: xdg-settings set default-web-browser firefox.desktop
+  environment:
+    XDG_CURRENT_DESKTOP: GNOME
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ ansible_user_id }}/bus"
+    DISPLAY: ":0"
