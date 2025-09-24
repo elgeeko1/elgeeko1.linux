@@ -18,5 +18,8 @@
     create: true
     mode: u=rwx,g=rx,o=
 
+- name: Disable systemd-networkd-wait-online
+  ansible.builtin.import_tasks: systemd-networkd-wait-online.yml
+
 - name: Perform scheduled reboot
   ansible.builtin.import_tasks: reboot.yml
