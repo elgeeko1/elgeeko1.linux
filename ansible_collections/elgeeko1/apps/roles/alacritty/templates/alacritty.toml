@@ -22,8 +22,8 @@ program = "C:\\msys64\\usr\\bin\\bash.exe"
 args = ["-lc", "tmux new-session -A -s main"]
 {% else %}
 [shell]
-program = "/usr/bin/tmux"
-args = ["new-session", "-A", "-s", "main"]
+program = "tmux"
+args = ["new-session"]
 {% endif %}
 {% endif %}
 
