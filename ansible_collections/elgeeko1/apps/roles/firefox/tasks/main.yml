@@ -51,5 +51,5 @@
     state: "{{ _firefox_deb.changed | ternary('latest', 'present') }}"
 
 - name: Set Firefox as default Gnome browser
-  when: _firefox_set_default_browser
+  when: firefox_set_default_browser
   ansible.builtin.import_tasks: default_browser.yml

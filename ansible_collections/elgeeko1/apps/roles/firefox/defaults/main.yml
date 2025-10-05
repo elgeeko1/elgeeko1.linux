@@ -1,2 +1,4 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
 ---
-_firefox_set_default_browser: true
+firefox_set_default_browser: true
