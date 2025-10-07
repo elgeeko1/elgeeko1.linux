@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+- name: Install Remmina + FreeRDP
+  become: true
+  ansible.builtin.apt:
+    name:
+      - remmina
+      - freerdp2-x11
+      - freerdp2-wayland
+      - remmina-plugin-rdp
+
+# A) Global Remmina preferences
+- name: Ensure Remmina global config directory exists
+  become: true
+  ansible.builtin.file:
+    path: /etc/xdg/remmina
+    state: directory
+    mode: u=rwx,go=rx
+
+- name: Set Host Key to Left Ctrl (Control_L) in global prefs
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/xdg/remmina/remmina.pref
+    regexp: '^hostkey='
+    line: 'hostkey=65507'   # Control_L
+    create: true
+    mode: u=rw,go=r
