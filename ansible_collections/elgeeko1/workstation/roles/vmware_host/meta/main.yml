@@ -3,7 +3,7 @@
 ---
 galaxy_info:
   author: Jeff C. Jensen <11233838+elgeeko1@users.noreply.github.com>
-  description: "Configure Linux with vmware-specific tools."
+  description: "Configure Linux with vmware-specific tools for a host running in vmware."
   license: MIT
   min_ansible_version: "2.16"
   platforms:
@@ -11,7 +11,7 @@ galaxy_info:
       versions: [jammy, noble]
     - name: Debian
       versions: [bullseye, bookworm]
-  galaxy_tags: [linux, workstation, vmware]
+  galaxy_tags: [linux, workstation, vmware_host]
 
 collections:
   - community.general

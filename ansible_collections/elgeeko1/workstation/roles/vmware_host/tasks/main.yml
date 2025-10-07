@@ -1,12 +1,4 @@
 ---
-- name: Filter service systemd-networkd-wait-online to bridge network only
-  become: true
-  ansible.builtin.lineinfile:
-    path: /etc/systemd/system/network-online.target.wants/NetworkManager-wait-online.service
-    regexp: "^ExecStart=/usr/lib/systemd/systemd-networkd-wait-online"
-    line: "ExecStart=/usr/lib/systemd/systemd-networkd-wait-online --interface={{ ansible_facts['interfaces'] | select('match', '^ens') | first }}"
-    backup: true
-
 - name: Install open-vm-tools
   become: true
   ansible.builtin.package:
@@ -14,13 +6,13 @@
       - open-vm-tools
 
 - name: Install open-vm-tools-desktop
-  when: vmware_desktop_enabled
+  when: vmware_host_desktop_enabled
   ansible.builtin.package:
     name:
       - open-vm-tools-desktop
 
 - name: Ubuntu desktop query desktop idle delay
-  when: vmware_desktop_enabled
+  when: vmware_host_desktop_enabled
   register: _vmware_r_idle_delay
   changed_when: false
   ansible.builtin.command:
@@ -28,7 +20,7 @@
 
 - name: Ubuntu desktop disable idle delay
   when:
-    - vmware_desktop_enabled
+    - vmware_host_desktop_enabled
     - _vmware_r_idle_delay.stdout != "uint32 0"
   ansible.builtin.command:
     cmd: gsettings set org.gnome.desktop.session idle-delay 0
