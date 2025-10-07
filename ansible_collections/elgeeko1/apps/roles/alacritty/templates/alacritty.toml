@@ -17,9 +17,9 @@
 
 {% if alacritty_tmux_enabled %}
 {% if osfam == 'Windows' %}
-[shell]
-program = "C:\\msys64\\usr\\bin\\bash.exe"
-args = ["-lc", "tmux new-session -A -s main"]
+[terminal.shell]
+program = "C:\\Program Files\\Git\\bin\\bash.exe"
+args = ["--login"]
 {% else %}
 [shell]
 program = "tmux"
