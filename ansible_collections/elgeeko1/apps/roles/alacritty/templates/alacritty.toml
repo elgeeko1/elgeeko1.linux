@@ -35,6 +35,7 @@ save_to_clipboard = true
 [window]
 dynamic_title = true
 dimensions = { columns = 120, lines = 40 }
+option_as_alt = "Both"
 
 [cursor]
 style = { shape = "Beam", blinking = "On" }
