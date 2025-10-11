@@ -15,13 +15,15 @@
 # SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
 # SPDX-License-Identifier: MIT
 
+[terminal.shell]
 {% if alacritty_tmux_enabled %}
 {% if osfam == 'Windows' %}
-[terminal.shell]
 program = "C:\\Program Files\\Git\\bin\\bash.exe"
 args = ["--login"]
+{% elif osfam == 'Darwin' %}
+program = "/usr/local/bin/tmux"
+args = ["new-session"]
 {% else %}
-[shell]
 program = "tmux"
 args = ["new-session"]
 {% endif %}
@@ -75,6 +77,12 @@ action = "Paste"
 [[keyboard.bindings]]
 key = "T"
 mods = "Control|Shift"
+chars = "\u0001c"  # Ctrl-a, then 'c' (tmux new-window)
+
+# GUI-tab feel – Command+Shift+T sends Ctrla+c to tmux for "new tab"
+[[keyboard.bindings]]
+key = "T"
+mods = "Command|Shift"
 chars = "\u0001c"  # Ctrl-a, then 'c' (tmux new-window)
 
 [colors]
