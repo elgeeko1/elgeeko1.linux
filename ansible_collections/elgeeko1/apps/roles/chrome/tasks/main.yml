@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
 ---
 - name: Download Google Linux signing key
   become: true
@@ -17,6 +19,7 @@
     creates: /etc/apt/keyrings/google-linux-signing.gpg
 
 - name: Add Google Chrome APT repository
+  register: _chrome_repo
   become: true
   ansible.builtin.apt_repository:
     repo: >-
@@ -24,8 +27,14 @@
       https://dl.google.com/linux/chrome/deb/ stable main
     filename: google-chrome
 
+- name: Apt update cache
+  when: _chrome_repo.changed
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+
 - name: Install Google Chrome
   become: true
   ansible.builtin.apt:
-    name: "google-chrome-stable"
+    name: google-chrome-stable
     state: present

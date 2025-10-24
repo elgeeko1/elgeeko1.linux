@@ -15,7 +15,7 @@
 # SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
 # SPDX-License-Identifier: MIT
 
-[terminal.shell]
+[shell]
 {% if alacritty_tmux_enabled %}
 {% if osfam == 'Windows' %}
 program = "C:\\Program Files\\Git\\bin\\bash.exe"
