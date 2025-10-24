@@ -1,0 +1,43 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+- name: Download xtradeb PPA signing key (ASCII-armored)
+  become: true
+  ansible.builtin.get_url:
+    url: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x5301FA4FD93244FBC6F6149982BB6851C64F6880"
+    dest: /etc/apt/keyrings/xtradeb.asc
+    mode: u=rw,go=r
+
+- name: Dearmor xtradeb signing key
+  become: true
+  changed_when: true
+  ansible.builtin.command: >
+    gpg --dearmor --yes
+    --output /etc/apt/keyrings/xtradeb.gpg
+    /etc/apt/keyrings/xtradeb.asc
+  args:
+    creates: /etc/apt/keyrings/xtradeb.gpg
+  
+- name: Add xtradeb/apps PPA deb822 repository (Chromium deb builds)
+  register: _chromium_xtradeb_repo
+  become: true
+  ansible.builtin.deb822_repository:
+    name: xtradeb_apps
+    types: [deb]
+    uris: ["https://ppa.launchpadcontent.net/xtradeb/apps/ubuntu"]
+    suites: ["noble"]
+    components: ["main"]
+    signed_by: /etc/apt/keyrings/xtradeb.gpg
+    state: present
+
+- name: Apt update cache
+  when: _chromium_xtradeb_repo.changed
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install Chromium
+  become: true
+  ansible.builtin.apt:
+    name:
+      - chromium
