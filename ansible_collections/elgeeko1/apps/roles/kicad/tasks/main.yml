@@ -1,0 +1,41 @@
+# Install KiCad 9.x from the official PPA (deb822 + explicit key)
+- name: Fetch KiCad PPA signing key (ASCII-armored)
+  become: true
+  ansible.builtin.get_url:
+    url: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xFDA854F61C4D0D9572BB95E5245D5502FAD7A805"
+    dest: /etc/apt/keyrings/kicad-ppa.asc
+    mode: u=rw,go=r
+
+- name: De-armor KiCad PPA signing key
+  become: true
+  changed_when: true
+  ansible.builtin.shell: >
+    gpg --dearmor --yes
+    -o /etc/apt/keyrings/kicad-ppa.gpg
+    /etc/apt/keyrings/kicad-ppa.asc
+  args:
+    creates: /etc/apt/keyrings/kicad-ppa.gpg
+
+- name: Configure KiCad PPA (deb822)
+  register: _kicad_ppa_repo
+  become: true
+  ansible.builtin.deb822_repository:
+    name: kicad-9-ppa
+    types: [deb]
+    uris: "https://ppa.launchpadcontent.net/kicad/kicad-9.0-releases/ubuntu"
+    suites: "{{ ansible_distribution_release }}"
+    components: [main]
+    signed_by: /etc/apt/keyrings/kicad-ppa.gpg
+    state: present
+
+- name: Update apt cache
+  when: _kicad_ppa_repo.changed
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install KiCad
+  become: true
+  ansible.builtin.apt:
+    name: kicad
+    state: present
