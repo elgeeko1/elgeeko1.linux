@@ -27,3 +27,29 @@
     regexp: "^bind 'set mark-symlinked-directories*'"
     line: "bind 'set mark-symlinked-directories on'"
     create: false
+
+- name: Add "title()" shell function to ~/.bash_aliases
+  ansible.builtin.blockinfile:
+    path: "{{ ansible_env.HOME }}/.bash_aliases"
+    create: true
+    mode: u=rw,go=r
+    marker: "# {mark} ANSIBLE MANAGED: title() function"
+    block: |
+      title() {
+        local title_str="${*:-}"
+
+        if [[ -n "${TMUX:-}" ]]; then
+          # Set tmux per-pane title (used by pane_title)
+          tmux select-pane -T "$title_str"
+        else
+          # Outside tmux: set terminal title via OSC 0
+          printf '\033]0;%s\007' "$title_str"
+        fi
+      }
+
+- name: Reset pane title in .bashrc
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    line: "command -v title >/dev/null 2>&1 && title || true"
+    create: false
+    
