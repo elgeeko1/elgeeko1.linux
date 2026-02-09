@@ -38,11 +38,14 @@
       title() {
         local title_str="${*:-}"
 
+        # strip 'sudo' prefix if present
+        title_str="${title_str#sudo }"
+
         if [[ -n "${TMUX:-}" ]]; then
-          # Set tmux per-pane title (used by pane_title)
+          # set tmux per-pane title (used by pane_title)
           tmux select-pane -T "$title_str"
         else
-          # Outside tmux: set terminal title via OSC 0
+          # outside tmux: set terminal title via OSC 0
           printf '\033]0;%s\007' "$title_str"
         fi
       }
