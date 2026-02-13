@@ -21,5 +21,8 @@
 - name: Disable systemd-networkd-wait-online
   ansible.builtin.import_tasks: systemd-networkd-wait-online.yml
 
+- name: Configure Gnome settings
+  ansible.builtin.import_tasks: gnome.yml
+
 - name: Perform scheduled reboot
   ansible.builtin.import_tasks: reboot.yml
