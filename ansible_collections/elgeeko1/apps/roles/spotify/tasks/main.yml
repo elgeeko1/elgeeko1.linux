@@ -4,7 +4,7 @@
 - name: Download Spotify GPG key
   become: true
   ansible.builtin.get_url:
-    url: https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.asc
+    url: https://download.spotify.com/debian/pubkey_5E3C45D7B312C643.gpg
     dest: /usr/share/keyrings/spotify.gpg
     mode: u=rw,g=r,o=r
 
@@ -20,15 +20,10 @@
 - name: Configure Spotify APT repository
   register: _spotify_repo
   become: true
-  ansible.builtin.deb822_repository:
-    name: spotify
-    types: [deb]
-    uris: https://repository.spotify.com
-    suites: [stable]
-    components: [non-free]
-    signed_by: /etc/apt/keyrings/spotify.gpg
-    enabled: true
-    state: present
+  ansible.builtin.copy:
+    path: /etc/apt/sources.list.d/spotify.list
+    content: deb [signed-by=/etc/apt/keyrings/spotify.gpg] https://repository.spotify.com stable non-free
+    force: false
 
 - name: Update APT cache
   become: true
