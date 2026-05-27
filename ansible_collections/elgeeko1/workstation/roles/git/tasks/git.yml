@@ -32,6 +32,12 @@
     scope: global
     value: main
 
+- name: Configure git advice.skippedCherryPicks = false
+  community.general.git_config:
+    name: advice.skippedCherryPicks
+    scope: global
+    value: false
+
 - name: Configure git user.name = {{ git_github_username }}
   community.general.git_config:
     name: user.name
