@@ -15,7 +15,7 @@
 # SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
 # SPDX-License-Identifier: MIT
 
-[shell]
+[terminal.shell]
 {% if alacritty_tmux_enabled %}
 {% if osfam == 'Windows' %}
 program = "C:\\Program Files\\Git\\bin\\bash.exe"
@@ -73,6 +73,12 @@ action = "Copy"
 key = "V"
 mods = "Command"
 action = "Paste"
+
+# shift+enter inserts a newline in claude cli (sends esc + cr)
+[[keyboard.bindings]]
+key = "Return"
+mods = "Shift"
+chars = "\u001b\r"
 
 # GUI-tab feel – Ctrl+Shift+T sends Ctrla+c to tmux for "new tab"
 [[keyboard.bindings]]
