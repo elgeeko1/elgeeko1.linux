@@ -2,9 +2,16 @@
 # SPDX-License-Identifier: MIT
 name: Release
 
+# a v* tag runs the quality checks and every Molecule scenario on the tagged
+# commit, and builds the collections. a semver tag then creates the GitHub
+# release; a failed job is retried with "Re-run failed jobs" on the tag run.
 on:
   push:
     tags: ["v*"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -17,11 +24,79 @@ env:
   COLLECTIONS: linux apps workstation
 
 jobs:
-  release:
-    name: release
-    runs-on: ubuntu-24.04
+  setup:
+    name: setup
+    runs-on: ubuntu-26.04
+    outputs:
+      is_release: ${{ steps.identity.outputs.is_release }}
+      prerelease: ${{ steps.identity.outputs.prerelease }}
+    steps:
+      # full history and branches so the main-ancestor check works
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # only a semver tag releases. a full release must be reachable from main;
+      # a pre-release (hyphenated) may be tagged anywhere.
+      - name: Determine release identity
+        id: identity
+        run: |
+          semver='^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$'
+          is_release=false
+          prerelease=false
+          if printf '%s' "$GITHUB_REF_NAME" | grep -Eq "$semver"; then
+            is_release=true
+            case "$GITHUB_REF_NAME" in
+              *-*) prerelease=true ;;
+            esac
+            if [ "$prerelease" = false ]; then
+              git fetch origin main
+              git merge-base --is-ancestor "$GITHUB_SHA" origin/main \
+                || { echo "error: full release tag $GITHUB_REF_NAME is not reachable from main" >&2; exit 1; }
+            fi
+          fi
+          {
+            echo "is_release=$is_release"
+            echo "prerelease=$prerelease"
+          } >> "$GITHUB_OUTPUT"
+
+      # galaxy.yml carries the full tag version; the changelog section names the
+      # numeric release that its pre-releases share
+      - name: Check collection versions and changelogs
+        if: steps.identity.outputs.is_release == 'true'
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          numeric="${version%%[-+]*}"
+          for c in ${COLLECTIONS}; do
+            dir="ansible_collections/elgeeko1/${c}"
+            galaxy_version="$(sed -n 's/^version: //p' "${dir}/galaxy.yml")"
+            if [[ "${galaxy_version}" != "${version}" ]]; then
+              echo "::error file=${dir}/galaxy.yml::version ${galaxy_version} does not match tag ${GITHUB_REF_NAME}"
+              exit 1
+            fi
+            if ! grep -q "^## \[${numeric}\] - " "${dir}/CHANGELOG.md"; then
+              echo "::error file=${dir}/CHANGELOG.md::no section for ${numeric}"
+              exit 1
+            fi
+          done
+
+  quality:
+    name: quality
+    needs: [setup]
+    uses: ./.github/workflows/_quality.yml
+
+  molecule:
+    name: molecule
+    needs: [setup]
+    uses: ./.github/workflows/_molecule.yml
+
+  build:
+    name: build
+    needs: [setup]
+    runs-on: ubuntu-26.04
     permissions:
-      contents: write
+      contents: read
 
     steps:
       - name: Checkout
@@ -30,50 +105,57 @@ jobs:
       - name: Set up Python
         uses: ./.github/actions/setup-python
 
-      - name: Check collection versions and changelogs
-        env:
-          TAG: ${{ github.ref_name }}
-        run: |
-          set -euo pipefail
-          version="${TAG#v}"
-          for c in ${COLLECTIONS}; do
-            dir="ansible_collections/elgeeko1/${c}"
-            galaxy_version="$(sed -n 's/^version: //p' "${dir}/galaxy.yml")"
-            if [[ "${galaxy_version}" != "${version}" ]]; then
-              echo "::error file=${dir}/galaxy.yml::version ${galaxy_version} does not match tag ${TAG}"
-              exit 1
-            fi
-            if ! grep -q "^## \[${version}\] - " "${dir}/CHANGELOG.md"; then
-              echo "::error file=${dir}/CHANGELOG.md::no section for ${version}"
-              exit 1
-            fi
-          done
-
       - name: Build collections
         run: |
-          set -euo pipefail
           for c in ${COLLECTIONS}; do
             ansible-galaxy collection build "ansible_collections/elgeeko1/${c}" --output-path dist
           done
 
       - name: Write release notes
-        env:
-          TAG: ${{ github.ref_name }}
         run: |
-          set -euo pipefail
-          version="${TAG#v}"
+          version="${GITHUB_REF_NAME#v}"
+          numeric="${version%%[-+]*}"
           for c in ${COLLECTIONS}; do
             printf '## elgeeko1.%s\n\n' "${c}"
             # the version section ends at the next release heading or at the link references
-            awk -v header="## [${version}] - " '
+            awk -v header="## [${numeric}] - " '
               index($0, header) == 1 { found = 1; next }
               found && (/^## \[/ || /^\[[^]]+\]: /) { exit }
               found { print }
             ' "ansible_collections/elgeeko1/${c}/CHANGELOG.md"
-          done >"${RUNNER_TEMP}/release-notes.md"
+          done >dist/release-notes.md
 
-      - name: Create GitHub release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
-        run: gh release create "${TAG}" dist/*.tar.gz --title "${TAG}" --notes-file "${RUNNER_TEMP}/release-notes.md" --verify-tag
+      - name: Upload collections
+        uses: actions/upload-artifact@v7
+        with:
+          name: collections
+          path: dist/
+          if-no-files-found: error
+
+  github-release:
+    name: github release
+    needs: [setup, quality, molecule, build]
+    if: ${{ needs.setup.outputs.is_release == 'true' }}
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download collections
+        uses: actions/download-artifact@v8
+        with:
+          name: collections
+          path: dist
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ github.ref_name }}
+          target_commitish: ${{ github.sha }}
+          body_path: dist/release-notes.md
+          generate_release_notes: false
+          draft: false
+          prerelease: ${{ needs.setup.outputs.prerelease == 'true' }}
+          make_latest: ${{ needs.setup.outputs.prerelease != 'true' }}
+          fail_on_unmatched_files: true
+          files: dist/*.tar.gz

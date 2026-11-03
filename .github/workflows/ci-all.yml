@@ -1,0 +1,49 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+name: CI (all)
+
+# every pull request runs the full suite, whatever its base branch; a branch push
+# runs it only for main. a push filter that names branches does not match tag
+# pushes, so a v* tag reaches release.yml alone.
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+# a pull request and a push can carry the same head branch, so the key uses the
+# pull request number to keep the two from cancelling each other
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  quality:
+    name: quality
+    uses: ./.github/workflows/_quality.yml
+
+  molecule:
+    name: molecule
+    uses: ./.github/workflows/_molecule.yml
+
+  ci-result:
+    name: ci-result
+    if: always()
+    needs: [quality, molecule]
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Check results
+        env:
+          QUALITY_RESULT: ${{ needs.quality.result }}
+          MOLECULE_RESULT: ${{ needs.molecule.result }}
+        run: |
+          echo "quality=$QUALITY_RESULT molecule=$MOLECULE_RESULT"
+          [[ "$QUALITY_RESULT"  == "success" ]] || exit 1
+          [[ "$MOLECULE_RESULT" == "success" ]] || exit 1

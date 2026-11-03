@@ -6,9 +6,6 @@ name: Quality checks
 on:
   workflow_call:
 
-permissions:
-  contents: read
-
 defaults:
   run:
     shell: bash
@@ -16,14 +13,22 @@ defaults:
 jobs:
   lint:
     name: lint
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
 
     steps:
+      # --- checkout ---
+
       - name: Checkout
         uses: actions/checkout@v7
 
+      # --- tools & dependencies ---
+
       - name: Set up Python
         uses: ./.github/actions/setup-python
+
+      # --- lint ---
 
       - name: ansible-lint
         run: ansible-lint
@@ -34,21 +39,25 @@ jobs:
           git ls-files -z "*.md" ":(exclude).agents/**" ":(exclude).claude/**"
           | xargs -0r docker run --rm --volume "${PWD}:/workdir" davidanson/markdownlint-cli2:v0.24.0 --
 
-      - name: actionlint
-        # image tag matches the actionlint rev in .pre-commit-config.yaml
-        run: docker run --rm --volume "${PWD}:/repo" --workdir /repo docker.io/rhysd/actionlint:1.7.12 -color
-
-      - name: Role README variable tables
-        run: |
-          scripts/generate-role-docs.sh
-          git diff --exit-code
-
       - name: lychee
         # image tag matches the lychee rev in .pre-commit-config.yaml; --offline checks local links only
         run: >-
           git ls-files -z "*.md" ":(exclude).agents/**" ":(exclude).claude/**"
           | xargs -0r docker run --rm --volume "${PWD}:/input" --workdir /input docker.io/lycheeverse/lychee:0.24.2
           --offline --no-progress --
+
+      - name: actionlint
+        # image tag matches the actionlint rev in .pre-commit-config.yaml
+        run: docker run --rm --volume "${PWD}:/repo" --workdir /repo docker.io/rhysd/actionlint:1.7.12 -color
+
+      # --- generated docs ---
+
+      - name: Role README variable tables
+        run: |
+          scripts/generate-role-docs.sh
+          git diff --exit-code
+
+      # --- format ---
 
       - name: mdformat
         run: >-

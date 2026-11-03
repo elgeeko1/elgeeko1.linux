@@ -1,30 +1,27 @@
 # SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
 # SPDX-License-Identifier: MIT
-name: CI
+# reusable workflow: Molecule scenarios, one job per scenario
+name: Molecule
 
 on:
-  push:
-  workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
-  cancel-in-progress: true
-
-permissions:
-  contents: read
+  workflow_call:
+    inputs:
+      platform:
+        description: Platform to test in each scenario, such as ubuntu2604; empty tests every platform
+        type: string
+        required: false
+        default: ""
 
 defaults:
   run:
     shell: bash
 
 jobs:
-  quality:
-    name: quality
-    uses: ./.github/workflows/_quality.yml
-
   scenarios:
     name: scenarios
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
     outputs:
       matrix: ${{ steps.list.outputs.matrix }}
 
@@ -35,7 +32,6 @@ jobs:
       - name: List Molecule scenarios
         id: list
         run: |
-          set -euo pipefail
           matrix=$(
             find ansible_collections/elgeeko1/*/extensions/molecule -mindepth 2 -maxdepth 2 -name molecule.yml \
               | sort \
@@ -45,9 +41,11 @@ jobs:
           echo "matrix=${matrix}" >> "${GITHUB_OUTPUT}"
 
   molecule:
-    name: molecule (${{ matrix.collection }}.${{ matrix.scenario }})
+    name: ${{ matrix.collection }}.${{ matrix.scenario }}
     needs: scenarios
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -60,8 +58,15 @@ jobs:
       - name: Set up Python
         uses: ./.github/actions/setup-python
 
+      # each platform in .config/molecule/config.yml is named <scenario>-<platform>
       - name: Run molecule
         working-directory: ansible_collections/elgeeko1/${{ matrix.collection }}
         env:
           SCENARIO: ${{ matrix.scenario }}
-        run: molecule test -s "${SCENARIO}"
+          PLATFORM: ${{ inputs.platform }}
+        run: |
+          if [[ -n "${PLATFORM}" ]]; then
+            molecule test -s "${SCENARIO}" -p "${SCENARIO}-${PLATFORM}"
+          else
+            molecule test -s "${SCENARIO}"
+          fi

@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- `alacritty` and `slack` retry their snap install when the Snap Store rate-limits the request.
+
 ## [2.0.0] - 2026-11-03
 
 ### Added
@@ -57,3 +63,4 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `alacritty` deploys the template named by `alacritty_tmux_config_template`.
 
 [2.0.0]: https://github.com/elgeeko1/elgeeko1.linux/releases/tag/v2.0.0
+[unreleased]: https://github.com/elgeeko1/elgeeko1.linux/compare/v2.0.0...HEAD

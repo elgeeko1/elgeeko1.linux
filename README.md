@@ -63,6 +63,17 @@ molecule test -s chrome
 molecule test --all
 ```
 
+### CI
+
+| Workflow | Runs on | Checks |
+| -- | -- | -- |
+| [CI (all)](.github/workflows/ci-all.yml) | pushes to `main`, pull requests | quality checks, every scenario on every platform |
+| [CI (quick)](.github/workflows/ci-quick.yml) | pushes to other branches without an open pull request | quality checks, every scenario on Ubuntu 26.04 |
+| [Release](.github/workflows/release.yml) | `v*` tags | quality checks, every scenario on every platform, collection build |
+
+The quality checks in [\_quality.yml](.github/workflows/_quality.yml) run ansible-lint,
+markdownlint, lychee, actionlint, and mdformat, and fail on a stale role README table.
+
 ## Versioning
 
 The three collections share one version and one release tag, `vX.Y.Z`, under
@@ -94,7 +105,10 @@ git push origin vX.Y.Z
 ```
 
 The [release workflow](.github/workflows/release.yml) checks that every `galaxy.yml` version and
-changelog section matches the tag, builds the collections, and attaches them to a GitHub release.
+changelog section matches the tag and that a full release tag is on `main`, runs the quality checks
+and every Molecule scenario on the tagged commit, and builds the collections. When all pass, it
+creates the GitHub release with the collections attached. A tag with a hyphenated pre-release suffix
+creates a pre-release.
 
 ## License
 

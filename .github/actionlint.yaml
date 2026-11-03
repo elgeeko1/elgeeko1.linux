@@ -1,0 +1,6 @@
+# actionlint configuration
+---
+self-hosted-runner:
+  # GitHub-hosted runner labels absent from the built-in label list of actionlint
+  labels:
+    - ubuntu-26.04

@@ -1,4 +1,5 @@
 ---
+# snap info reports a Snap Store rate-limit response (HTTP 429) as "no snap found"
 - name: Install Slack (snap)
   become: true
   community.general.snap:
@@ -6,3 +7,6 @@
     channel: stable
     classic: true
     state: present
+  retries: 5
+  delay: 10
+  until: _task.result is succeeded

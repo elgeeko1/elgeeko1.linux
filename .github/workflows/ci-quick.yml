@@ -1,0 +1,73 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+name: CI (quick)
+
+# fast subset for branches under development: every scenario on Ubuntu 26.04 only.
+# pull requests are validated by ci-all.yml, so this workflow carries no
+# pull_request trigger; a push filter that names branches does not match tag
+# pushes, so a v* tag reaches release.yml alone.
+on:
+  push:
+    branches-ignore: ["main"]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # skip the checks when the pushed branch already has an open PR; that PR's
+  # CI (all) run validates the commit, so a push-triggered quick run would
+  # duplicate work. manual dispatch always runs.
+  detect-pr:
+    name: detect-pr
+    runs-on: ubuntu-26.04
+    permissions:
+      pull-requests: read
+    outputs:
+      open: ${{ steps.check.outputs.open }}
+    steps:
+      - name: Check for open PR
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          count=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$GITHUB_REF_NAME" --state open --json number --jq 'length')
+          [[ "$count" -gt 0 ]] && open=true || open=false
+          echo "open=$open" >> "$GITHUB_OUTPUT"
+
+  quality:
+    name: quality
+    needs: [detect-pr]
+    if: github.event_name != 'push' || needs.detect-pr.outputs.open == 'false'
+    uses: ./.github/workflows/_quality.yml
+
+  molecule:
+    name: molecule
+    needs: [detect-pr]
+    if: github.event_name != 'push' || needs.detect-pr.outputs.open == 'false'
+    uses: ./.github/workflows/_molecule.yml
+    with:
+      platform: ubuntu2604
+
+  ci-result:
+    name: ci-result
+    if: always() && (github.event_name != 'push' || needs.detect-pr.outputs.open == 'false')
+    needs: [detect-pr, quality, molecule]
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Check results
+        env:
+          QUALITY_RESULT: ${{ needs.quality.result }}
+          MOLECULE_RESULT: ${{ needs.molecule.result }}
+        run: |
+          echo "quality=$QUALITY_RESULT molecule=$MOLECULE_RESULT"
+          [[ "$QUALITY_RESULT"  == "success" ]] || exit 1
+          [[ "$MOLECULE_RESULT" == "success" ]] || exit 1
