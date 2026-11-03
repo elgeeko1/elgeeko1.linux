@@ -1,0 +1,9 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: List installed snaps
+      register: _verify_snaps
+      changed_when: false
+      ansible.builtin.command:
+        cmd: snap list slack

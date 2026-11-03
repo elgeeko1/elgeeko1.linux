@@ -2,12 +2,20 @@
 # SPDX-License-Identifier: MIT
 ---
 - name: Install Microsoft apt repository
-  ansible.builtin.import_tasks: microsoft-repo.yml
+  ansible.builtin.import_tasks: microsoft_repo.yml
+
+# the code postinst dearmors the Microsoft signing key with gpg
+- name: Install gpg
+  become: true
+  ansible.builtin.apt:
+    name: gpg
+    state: present
 
 - name: Install apt package code{{ '=' ~ vscode_version if vscode_version else '' }}
   become: true
   ansible.builtin.apt:
     name: code{{ '=' ~ vscode_version if vscode_version else '' }}
+    state: present
 
 - name: Install Visual Studio Code extensions
   ansible.builtin.import_tasks: extensions.yml

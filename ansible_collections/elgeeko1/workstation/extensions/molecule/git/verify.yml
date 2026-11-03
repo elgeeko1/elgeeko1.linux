@@ -1,0 +1,14 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Read the global git configuration
+      register: _verify_git
+      community.general.git_config_info:
+        scope: global
+
+    - name: Assert git signs commits as octocat
+      ansible.builtin.assert:
+        that:
+          - _verify_git.config_values['user.name'] == ['octocat']
+          - _verify_git.config_values['commit.gpgsign'] == ['true']

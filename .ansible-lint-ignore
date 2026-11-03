@@ -1,0 +1,2 @@
+# role name is part of the public FQCN elgeeko1.apps.1password used by consumers
+ansible_collections/elgeeko1/apps/roles/1password role-name skip

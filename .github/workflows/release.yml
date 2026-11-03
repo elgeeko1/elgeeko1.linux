@@ -1,0 +1,79 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  COLLECTIONS: linux apps workstation
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: ./.github/actions/setup-python
+
+      - name: Check collection versions and changelogs
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          version="${TAG#v}"
+          for c in ${COLLECTIONS}; do
+            dir="ansible_collections/elgeeko1/${c}"
+            galaxy_version="$(sed -n 's/^version: //p' "${dir}/galaxy.yml")"
+            if [[ "${galaxy_version}" != "${version}" ]]; then
+              echo "::error file=${dir}/galaxy.yml::version ${galaxy_version} does not match tag ${TAG}"
+              exit 1
+            fi
+            if ! grep -q "^## \[${version}\] - " "${dir}/CHANGELOG.md"; then
+              echo "::error file=${dir}/CHANGELOG.md::no section for ${version}"
+              exit 1
+            fi
+          done
+
+      - name: Build collections
+        run: |
+          set -euo pipefail
+          for c in ${COLLECTIONS}; do
+            ansible-galaxy collection build "ansible_collections/elgeeko1/${c}" --output-path dist
+          done
+
+      - name: Write release notes
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          version="${TAG#v}"
+          for c in ${COLLECTIONS}; do
+            printf '## elgeeko1.%s\n\n' "${c}"
+            # the version section ends at the next release heading or at the link references
+            awk -v header="## [${version}] - " '
+              index($0, header) == 1 { found = 1; next }
+              found && (/^## \[/ || /^\[[^]]+\]: /) { exit }
+              found { print }
+            ' "ansible_collections/elgeeko1/${c}/CHANGELOG.md"
+          done >"${RUNNER_TEMP}/release-notes.md"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: gh release create "${TAG}" dist/*.tar.gz --title "${TAG}" --notes-file "${RUNNER_TEMP}/release-notes.md" --verify-tag

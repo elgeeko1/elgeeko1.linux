@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+argument_specs:
+  main:
+    short_description: Baseline configuration for Ubuntu hosts
+    options:
+      ubuntu_trim_motd:
+        description: Remove the dynamic message of the day entries.
+        type: bool
+        default: false
+      ubuntu_disable_unattended_upgrades:
+        description: Disable unattended upgrades.
+        type: bool
+        default: true
+      ubuntu_disable_error_reporting:
+        description: Remove error reporting.
+        type: bool
+        default: true
+      ubuntu_disable_pro:
+        description: Remove the Ubuntu Pro client.
+        type: bool
+        default: true

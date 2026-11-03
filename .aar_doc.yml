@@ -1,0 +1,37 @@
+# aar-doc configuration: renders the variables table in each role README.md from meta/argument_specs.yml
+---
+output_mode: inject
+output_template: |
+  <!-- BEGIN_ANSIBLE_DOCS -->
+  {%- macro type_of(spec) -%}
+    {{ spec.type }}{% if spec.elements %} of {{ spec.elements }}{% endif %}
+  {%- endmacro %}
+  {%- macro default_of(spec) -%}
+    {%- if spec.required -%}
+      required
+    {%- elif 'default' not in spec -%}
+      -
+    {%- elif spec.default is string and spec.default -%}
+      `{{ spec.default }}`
+    {%- else -%}
+      `{{ spec.default | tojson }}`
+    {%- endif -%}
+  {%- endmacro %}
+  {%- macro description_of(spec) -%}
+    {{ spec.description }}
+    {%- if spec.choices %} One of {% for choice in spec.choices %}`{{ choice }}`{{ ", " if not loop.last }}{% endfor %}.{% endif -%}
+  {%- endmacro %}
+  {%- set options = argument_specs.main.options %}
+  {%- if options %}
+
+  | Variable | Type | Default | Description |
+  | -- | -- | -- | -- |
+  {%- for name, spec in options.items() %}
+  | `{{ name }}` | {{ type_of(spec) }} | {{ default_of(spec) }} | {{ description_of(spec) }} |
+  {%- endfor %}
+  {%- else %}
+
+  None.
+  {%- endif %}
+
+  <!-- END_ANSIBLE_DOCS -->

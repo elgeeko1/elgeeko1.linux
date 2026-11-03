@@ -1,0 +1,7 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+argument_specs:
+  main:
+    short_description: Install KiCad 9 from the KiCad releases PPA
+    options: {}

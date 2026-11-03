@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: Apply elgeeko1.workstation.terminal
+      ansible.builtin.include_role:
+        name: elgeeko1.workstation.terminal
+      vars:
+        terminal_sudo_nopassword: true

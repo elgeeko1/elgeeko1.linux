@@ -1,0 +1,31 @@
+# ansible-lint configuration
+---
+profile: production
+strict: true
+use_default_rules: true
+verbosity: 1
+
+exclude_paths:
+  - .ansible/
+  - .cache/
+  - .claude/
+  - .github/
+  - collections/
+
+skip_list: []
+
+enable_list:
+  - role-argument-spec
+
+# ansible-core 2.22, which requires_ansible names, is absent from the built-in list of the meta-runtime rule
+supported_ansible_also:
+  - "2.22."
+
+kinds:
+  - playbook: "ansible_collections/*/*/extensions/molecule/*/{converge,verify,side_effect}.yml"
+  - playbook: ".config/molecule/prepare.yml"
+  - tasks: "ansible_collections/*/*/roles/*/tasks/*.yml"
+  - handlers: "ansible_collections/*/*/roles/*/handlers/*.yml"
+  - vars: "ansible_collections/*/*/roles/*/{defaults,vars}/*.yml"
+  - meta: "ansible_collections/*/*/roles/*/meta/main.yml"
+  - galaxy: "ansible_collections/*/*/galaxy.yml"

@@ -1,0 +1,20 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Stat the SSH private key
+      register: _verify_ssh_key
+      ansible.builtin.stat:
+        path: "{{ ansible_facts['env']['HOME'] }}/.ssh/id_ed25519"
+
+    - name: Read authorized keys
+      register: _verify_authorized_keys
+      ansible.builtin.slurp:
+        src: "{{ ansible_facts['env']['HOME'] }}/.ssh/authorized_keys"
+
+    - name: Assert the keypair exists and GitHub keys are authorized
+      ansible.builtin.assert:
+        that:
+          - _verify_ssh_key.stat.exists
+          - _verify_ssh_key.stat.mode == '0600'
+          - (_verify_authorized_keys.content | b64decode | length) > 0

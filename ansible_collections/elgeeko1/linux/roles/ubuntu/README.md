@@ -1,28 +1,46 @@
-# elgeeko1.linux.ubuntu - common Ubuntu operations
+# elgeeko1.linux.ubuntu
 
-This role is a standard configuration for Debian / Ubuntu systems.
+Baseline configuration for Ubuntu hosts.
 
 ## Features
 
-- disables unattended upgrades
-- disables error reporting
-- disables Ubuntu Pro
-- removes superflous messages of the day (motd)
+- Trims the login message of the day.
+- Disables unattended upgrades and the Ubuntu Pro ESM apt hook.
+- Removes apport, whoopsie, and ubuntu-report.
+- Removes the Ubuntu Pro client.
+- Reboots when a change requires it.
 
-## Role Variables
+## Requirements
 
-- `ubuntu_disable_unattended_upgrades`: Disable unattended upgrades?
+- The [collection requirements](../../README.md#requirements).
 
-  Default: `true`
+## Role variables
 
-- `ubuntu_disable_error_reporting`: Disable error reporting?
+<!-- BEGIN_ANSIBLE_DOCS -->
 
-  Default: `true`
+| Variable | Type | Default | Description |
+| -- | -- | -- | -- |
+| `ubuntu_trim_motd` | bool | `false` | Remove the dynamic message of the day entries. |
+| `ubuntu_disable_unattended_upgrades` | bool | `true` | Disable unattended upgrades. |
+| `ubuntu_disable_error_reporting` | bool | `true` | Remove error reporting. |
+| `ubuntu_disable_pro` | bool | `true` | Remove the Ubuntu Pro client. |
 
-- `ubuntu_disable_pro`: Disable Ubuntu Pro?
+<!-- END_ANSIBLE_DOCS -->
 
-  Default: `true`
+## Dependencies
 
-- `ubuntu_trim_motd`: Trim MOTD to minimal messages?
+`elgeeko1.linux.core`, declared in `meta/main.yml`.
 
-  Default: `false`
+## Example playbook
+
+```yaml
+- name: Configure workstations
+  hosts: workstations
+  roles:
+    - role: elgeeko1.linux.ubuntu
+```
+
+## License
+
+MIT. See [LICENSE](LICENSE). Portions are BSD-3-Clause; see
+[THIRD_PARTY_NOTICE.md](THIRD_PARTY_NOTICE.md).

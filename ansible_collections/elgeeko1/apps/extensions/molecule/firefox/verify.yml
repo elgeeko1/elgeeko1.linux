@@ -1,0 +1,22 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+
+    - name: Assert packages are installed
+      ansible.builtin.assert:
+        that:
+          - "'firefox' in ansible_facts.packages"
+
+    - name: Read the firefox package origin
+      register: _verify_policy
+      changed_when: false
+      ansible.builtin.command:
+        cmd: apt-cache policy firefox
+
+    - name: Assert firefox comes from the Mozilla Team PPA
+      ansible.builtin.assert:
+        that:
+          - "'ppa.launchpadcontent.net/mozillateam' in _verify_policy.stdout"

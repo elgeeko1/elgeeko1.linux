@@ -1,0 +1,20 @@
+---
+# reruns the maintainer scripts, as a package upgrade does
+- name: Side effect
+  hosts: all
+  tasks:
+    - name: Reinstall google-chrome-stable
+      become: true
+      changed_when: true
+      # the noninteractive frontend answers debconf prompts with their defaults, as unattended upgrades do
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+      # the apt module has no reinstall option
+      ansible.builtin.command:  # noqa: command-instead-of-module
+        cmd: apt-get install --reinstall --yes google-chrome-stable
+
+    - name: Run the google-chrome daily cron job
+      become: true
+      changed_when: true
+      ansible.builtin.command:
+        cmd: /etc/cron.daily/google-chrome

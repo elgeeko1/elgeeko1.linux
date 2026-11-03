@@ -16,11 +16,12 @@
       - python3-virtualenv
       - python3-setuptools
       - python3-psutil
+    state: present
 
 - name: Package install python3 apt and debian packages
-  when: ansible_distribution == "Ubuntu"
   become: true
   ansible.builtin.apt:
-    pkg:
+    name:
       - python3-apt
       - python3-debian
+    state: present

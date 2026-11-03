@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: MIT
 ---
 - name: Generate SSH key
-  ansible.builtin.import_tasks: ssh-keygen.yml
+  ansible.builtin.import_tasks: ssh_keygen.yml
 
 - name: Import GitHub keys to SSH authorized keys
   when: ssh_server_github_username | default('', true) | length > 0
-  ansible.builtin.import_tasks: ssh-import-id-gh.yml
+  ansible.builtin.import_tasks: ssh_import_id_gh.yml

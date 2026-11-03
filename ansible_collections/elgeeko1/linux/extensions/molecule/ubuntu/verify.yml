@@ -1,0 +1,13 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+
+    - name: Assert packages are removed
+      ansible.builtin.assert:
+        that:
+          - "'apport' not in ansible_facts.packages"
+          - "'whoopsie' not in ansible_facts.packages"
+          - "'ubuntu-pro-client' not in ansible_facts.packages"

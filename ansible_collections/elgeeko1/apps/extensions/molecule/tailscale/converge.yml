@@ -1,0 +1,10 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: Apply elgeeko1.apps.tailscale
+      ansible.builtin.include_role:
+        name: elgeeko1.apps.tailscale
+      vars:
+        # placeholder; the tasks that authenticate with it carry the molecule-notest tag
+        tailscale_auth_key: tskey-molecule-placeholder

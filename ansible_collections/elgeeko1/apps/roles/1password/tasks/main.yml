@@ -3,7 +3,7 @@
 - name: Map architecture for 1Password APT repo
   ansible.builtin.set_fact:
     _1password_apt_arch: >-
-      {{ {'x86_64':'amd64','aarch64':'arm64'}[ansible_architecture] | default('amd64') }}
+      {{ {'x86_64': 'amd64', 'aarch64': 'arm64'}[ansible_facts['architecture']] | default('amd64') }}
 
 - name: Download 1Password signing key (ASCII)
   become: true
@@ -12,6 +12,12 @@
     dest: /usr/share/keyrings/1password.asc
     mode: u=rw,g=r,o=r
     force: true
+
+- name: Install gpg
+  become: true
+  ansible.builtin.apt:
+    name: gpg
+    state: present
 
 - name: Dearmor 1Password signing key for APT
   become: true
@@ -24,31 +30,39 @@
   args:
     creates: /usr/share/keyrings/1password-archive-keyring.gpg
 
+# the 1password postinst rewrites 1password.sources, so the role creates it
+# once and leaves later rewrites in place
 - name: Add 1Password APT repository
   register: _1password_repo
   become: true
-  ansible.builtin.apt_repository:
-    repo: >-
-      deb [arch={{ _1password_apt_arch }}
-      signed-by=/usr/share/keyrings/1password-archive-keyring.gpg]
-      https://downloads.1password.com/linux/debian/{{ _1password_apt_arch }} stable main
-    filename: 1password
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/1password.sources
+    content: |
+      Types: deb
+      URIs: https://downloads.1password.com/linux/debian/{{ _1password_apt_arch }}
+      Suites: stable
+      Components: main
+      Architectures: {{ _1password_apt_arch }}
+      Signed-By: /usr/share/keyrings/1password-archive-keyring.gpg
+    force: false
+    mode: u=rw,g=r,o=r
 
 - name: Apt update cache
-  when: _1password_repo.changed
   become: true
   ansible.builtin.apt:
-    update_cache: true
+    update_cache: "{{ _1password_repo.changed }}"
 
 - name: Install 1Password
-  when: ansible_architecture in ['x86_64', 'amd64']
+  when: ansible_facts['architecture'] in ['x86_64', 'amd64']
   become: true
   ansible.builtin.apt:
     name:
       - 1password
+    state: present
 
 - name: Install 1Password cli
   become: true
   ansible.builtin.apt:
     name:
       - 1password-cli
+    state: present

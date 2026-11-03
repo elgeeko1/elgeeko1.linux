@@ -1,24 +1,41 @@
-# elgeeko1.apps.alacritty - install alacritty
+# elgeeko1.apps.alacritty
+
+Installs the Alacritty terminal emulator from the Snap Store with an optional tmux configuration.
 
 ## Features
 
-- installs alacritty
-- (optional) installs a sane default configuration
+- Installs the `alacritty` snap from the stable channel with classic confinement and deploys a
+  configuration to `~/.config/alacritty`.
+- Installs `tmux` and deploys `~/.tmux.conf`.
+- Adds a `title` shell function that sets the tmux pane title, or the terminal title outside tmux,
+  and clears the title when a shell starts.
 
-## Role Variables
+## Requirements
 
-### multiarchitecture builds
+- The [collection requirements](../../README.md#requirements).
+- Collections: `community.general`
 
-- `alacritty_config_template`: Alacritty configuration template file to deploy from the controller.
+## Role variables
 
-  Default: use `alacritty.toml` from this role.
+<!-- BEGIN_ANSIBLE_DOCS -->
 
-#### tmux
+| Variable | Type | Default | Description |
+| -- | -- | -- | -- |
+| `alacritty_config_template` | str | `alacritty.toml` | Template deployed to `~/.config/alacritty`; empty skips the deployment. |
+| `alacritty_tmux_enabled` | bool | `true` | Install tmux and deploy its configuration. |
+| `alacritty_tmux_config_template` | str | `tmux.conf` | Template deployed to `~/.tmux.conf`; empty skips the deployment. |
 
-- `alacritty_tmux_enabled`: configure Alacritty to use tmux.
+<!-- END_ANSIBLE_DOCS -->
 
-  Default: `true`.
+## Example playbook
 
-- `alacritty_tmux_config_template`: tmux configuration template file to deploy from the controller.
+```yaml
+- name: Configure workstations
+  hosts: workstations
+  roles:
+    - role: elgeeko1.apps.alacritty
+```
 
-  Default: use `tmux.conf` from this role.
+## License
+
+MIT. See [LICENSE](LICENSE).

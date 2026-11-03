@@ -1,0 +1,25 @@
+---
+- name: Verify
+  hosts: all
+  environment:
+    XDG_RUNTIME_DIR: /run/user/{{ molecule_uid }}
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+
+    - name: Assert packages are installed
+      ansible.builtin.assert:
+        that:
+          - "'open-vm-tools' in ansible_facts.packages"
+          - "'open-vm-tools-desktop' in ansible_facts.packages"
+
+    - name: Read the GNOME idle delay
+      register: _verify_idle_delay
+      changed_when: false
+      ansible.builtin.command:
+        cmd: gsettings get org.gnome.desktop.session idle-delay
+
+    - name: Assert the idle delay is disabled
+      ansible.builtin.assert:
+        that:
+          - _verify_idle_delay.stdout == 'uint32 0'

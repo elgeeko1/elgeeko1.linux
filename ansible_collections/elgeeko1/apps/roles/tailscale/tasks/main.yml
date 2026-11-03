@@ -1,20 +1,24 @@
 # SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
 # SPDX-License-Identifier: MIT
 ---
+# Tailscale publishes its current signing key at a fixed URL; force downloads it
+# every run and reports a change when the key changes
 - name: Install Tailscale APT key
   become: true
   ansible.builtin.get_url:
-    url: "https://pkgs.tailscale.com/stable/ubuntu/{{ ansible_facts['distribution_release'] }}.noarmor.gpg"
+    url: "https://pkgs.tailscale.com/stable/{{ ansible_facts['distribution'] | lower }}/{{ ansible_facts['distribution_release'] }}.noarmor.gpg"
     dest: /usr/share/keyrings/tailscale-archive-keyring.gpg
     mode: u=rw,g=r,o=r
+    force: true
 
 - name: Configure Tailscale APT repository
   become: true
   register: tailscale_repo
   ansible.builtin.deb822_repository:
+    install_python_debian: true
     name: tailscale
     types: [deb]
-    uris: "https://pkgs.tailscale.com/stable/ubuntu/"
+    uris: "https://pkgs.tailscale.com/stable/{{ ansible_facts['distribution'] | lower }}/"
     suites: "{{ ansible_facts['distribution_release'] }}"
     components: [main]
     signed_by: /usr/share/keyrings/tailscale-archive-keyring.gpg
@@ -23,12 +27,13 @@
 - name: Apt update cache
   become: true
   ansible.builtin.apt:
-    update_cache: "{{ tailscale_repo.changed | bool }}"
+    update_cache: "{{ tailscale_repo.changed }}"
 
 - name: Install Tailscale
   become: true
   ansible.builtin.apt:
     name: tailscale
+    state: present
 
 - name: Enable and start tailscaled
   become: true
@@ -37,7 +42,7 @@
     state: started
     enabled: true
 
-- name: Create directory /opt/tailscale/authkey
+- name: Create directory /opt/tailscale
   become: true
   ansible.builtin.file:
     path: /opt/tailscale
@@ -58,39 +63,32 @@
     mode: u=rw,g=,o=
 
 # check to avoid re-running `tailscale up` if already connected.
-- name: Check current Tailscale status
+- name: Check whether Tailscale needs to be brought up
   ansible.builtin.command: tailscale status --json
-  register: tailscale_status_raw
   changed_when: false
   failed_when: false
+  register:
+    _tailscale_up_required: >-
+      _task.result.rc != 0
+      or _task.result.stdout == ''
+      or (_task.result.stdout | from_json).BackendState | default('') != 'Running'
 
-- name: Bring Tailscale up
-  when: >
-    (tailscale_status_raw.rc != 0) or
-    ((tailscale_status_raw.stdout | default('')) == '') or
-    ((tailscale_status_raw.stdout | from_json).BackendState | default('') != 'Running')
-  changed_when: true
+- name: Stat Tailscale auth key file
+  when: _tailscale_up_required
   become: true
-  ansible.builtin.command: >
-    tailscale up
-    --authkey=file:/opt/tailscale/authkey
-    --ssh
-    {{ tailscale_up_extra_args | default('') }}
+  register: _tailscale_r_authkey
+  ansible.builtin.stat:
+    path: /opt/tailscale/authkey
 
-- name: Check Tailscale status
-  ansible.builtin.command: tailscale status --json
-  register: tailscale_verify_raw
-  changed_when: false
-
-- name: Assert Tailscale backend is Running
+- name: Validate Tailscale auth key file
+  when: _tailscale_up_required
   ansible.builtin.assert:
     that:
-      - "(tailscale_verify_raw.stdout | from_json).BackendState == 'Running'"
-    fail_msg: "Tailscale backend is not Running."
-    success_msg: "Tailscale backend is Running."
+      - _tailscale_r_authkey.stat.exists
+    fail_msg: tailscale_auth_key is empty and /opt/tailscale/authkey does not exist.
+    quiet: true
 
-- name: Show Tailscale hostname and IPs
-  ansible.builtin.debug:
-    msg:
-      - "Hostname: {{ (tailscale_verify_raw.stdout | from_json).Self.HostName | default('unknown') }}"
-      - "Tailscale IPs: {{ ((tailscale_verify_raw.stdout | from_json).Self.TailscaleIPs | default([])) | join(', ') }}"
+# joining a tailnet needs a valid auth key, so tests skip this tag
+- name: Bring Tailscale up and check that the backend is Running
+  tags: [molecule-notest]
+  ansible.builtin.import_tasks: up.yml

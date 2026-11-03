@@ -1,7 +1,7 @@
 ---
 - name: Ensure ~/.config/autostart exists
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.config/autostart"
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/autostart"
     state: directory
     mode: u=rwx,g=rx,o=rx
 
@@ -9,7 +9,7 @@
 # /etc/xdg/autostart/Zoom.desktop exists.
 - name: Create Zoom autostart user override
   ansible.builtin.copy:
-    dest: "{{ ansible_env.HOME }}/.config/autostart/Zoom.desktop"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.config/autostart/Zoom.desktop"
     mode: u=rw,g=r,o=r
     content: |
       [Desktop Entry]
@@ -23,29 +23,24 @@
 
 - name: Ensure local applications dir exists
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.local/share/applications"
+    path: "{{ ansible_facts['env']['HOME'] }}/.local/share/applications"
     state: directory
     mode: u=rwx,g=rx,o=rx
 
+# force: false keeps the copy from resetting the --no-silent edit below
 - name: Create Zoom desktop shortcut user override
   ansible.builtin.copy:
     src: /usr/share/applications/Zoom.desktop
-    dest: "{{ ansible_env.HOME }}/.local/share/applications/Zoom.desktop"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.local/share/applications/Zoom.desktop"
     remote_src: true
+    force: false
     mode: u=rw,g=r,o=r
 
 - name: Add --no-silent to Exec in user desktop shortcut
-  register: _zoom_shortcut
+  notify: "elgeeko1.apps.zoom : update_desktop_database"
   ansible.builtin.lineinfile:
-    path: "{{ ansible_env.HOME }}/.local/share/applications/Zoom.desktop"
-    regexp: '^Exec=(.*\bzoom)(?!.*--no-silent)(.*)$'
-    line: 'Exec=\1 --no-silent\2'
+    path: "{{ ansible_facts['env']['HOME'] }}/.local/share/applications/Zoom.desktop"
+    regexp: "^Exec=(.*\\bzoom)(?!.*--no-silent)(.*)$"
+    line: "Exec=\\1 --no-silent\\2"
     backrefs: true
     mode: u=rw,g=r,o=r
-
-- name: Update desktop database for user applications dir
-  when: _zoom_shortcut.changed
-  changed_when: true
-  ignore_errors: true  # not fatal
-  ansible.builtin.command:
-    cmd: "update-desktop-database {{ ansible_env.HOME }}/.local/share/applications"

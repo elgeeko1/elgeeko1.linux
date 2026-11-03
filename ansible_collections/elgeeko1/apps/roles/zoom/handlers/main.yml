@@ -1,0 +1,8 @@
+---
+- name: Update desktop database for user applications dir
+  listen:
+    - "elgeeko1.apps.zoom : update_desktop_database"
+  changed_when: true
+  failed_when: false
+  ansible.builtin.command:
+    cmd: "update-desktop-database {{ ansible_facts['env']['HOME'] }}/.local/share/applications"

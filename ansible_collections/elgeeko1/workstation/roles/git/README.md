@@ -1,21 +1,43 @@
-# elgeeko1.workstation.git — git Bootstrap
+# elgeeko1.workstation.git
 
-This role bootstraps git for a user on a Linux host.
+Configures git for a user, with an optional GPG signing key.
 
 ## Features
 
-- Installs git
-- Generates a gpg key and configures git to sign commits with it
-- Sets some sane git defaults
+- Installs git and sets the user identity, editor, and pull and branch defaults.
+- Generates an ed25519 GPG key and configures git to sign commits and tags.
+- Copies the public GPG key to `keys/gpg` next to the playbook on the controller.
 
-## Role Variables
+## Requirements
 
-- `git_github_username`: github username (used for git defaults and gpg key)
-- `git_github_email`: github email address (used for git defaults and gpg key)
-- `git_generate_gpg`: generate and use a gpg key for git commit signing
+- The [collection requirements](../../README.md#requirements).
+- Collections: `community.general`
 
-  Default: `true`
+## Role variables
 
-- `git_editor`: git default editor
+<!-- BEGIN_ANSIBLE_DOCS -->
 
-  Default: `nano`
+| Variable | Type | Default | Description |
+| -- | -- | -- | -- |
+| `git_github_username` | str | required | `user.name` and GPG key name. |
+| `git_github_email` | str | required | `user.email` and GPG key email. |
+| `git_generate_gpg` | bool | `true` | Generate a GPG key and sign commits and tags. |
+| `git_editor` | str | `nano` | `core.editor`. |
+
+<!-- END_ANSIBLE_DOCS -->
+
+## Example playbook
+
+```yaml
+- name: Configure workstations
+  hosts: workstations
+  roles:
+    - role: elgeeko1.workstation.git
+      vars:
+        git_github_username: octocat
+        git_github_email: octocat@example.com
+```
+
+## License
+
+MIT. See [LICENSE](LICENSE).

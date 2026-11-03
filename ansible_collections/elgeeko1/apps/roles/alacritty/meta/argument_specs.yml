@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+argument_specs:
+  main:
+    short_description: Install the Alacritty terminal emulator with an optional tmux configuration
+    options:
+      alacritty_config_template:
+        description: Template deployed to `~/.config/alacritty`; empty skips the deployment.
+        type: str
+        default: alacritty.toml
+      alacritty_tmux_enabled:
+        description: Install tmux and deploy its configuration.
+        type: bool
+        default: true
+      alacritty_tmux_config_template:
+        description: Template deployed to `~/.tmux.conf`; empty skips the deployment.
+        type: str
+        default: tmux.conf

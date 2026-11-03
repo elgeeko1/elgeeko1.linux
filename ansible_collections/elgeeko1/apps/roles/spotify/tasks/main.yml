@@ -1,29 +1,26 @@
 # SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
 # SPDX-License-Identifier: MIT
 ---
-- name: Download Spotify GPG key
+# spotify-client copies each rotated signing key into trusted.gpg.d on upgrade,
+# so a source that trusts trusted.gpg.d keeps verifying after a key rotation
+- name: Download Spotify signing key
   become: true
   ansible.builtin.get_url:
-    url: https://download.spotify.com/debian/pubkey_5E3C45D7B312C643.gpg
-    dest: /usr/share/keyrings/spotify.gpg
+    url: https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.asc
+    dest: /etc/apt/trusted.gpg.d/spotify.asc
     mode: u=rw,g=r,o=r
 
-- name: Dearmor Spotify GPG key
-  become: true
-  ansible.builtin.shell: >
-    gpg --dearmor
-    --output /etc/apt/keyrings/spotify.gpg
-    /usr/share/keyrings/spotify.gpg
-  args:
-    creates: /etc/apt/keyrings/spotify.gpg
-
+# spotify-client keeps an existing spotify.list and searches one-line .list
+# files for an existing source, so the role writes the one-line spotify.list
 - name: Configure Spotify APT repository
   register: _spotify_repo
   become: true
   ansible.builtin.copy:
-    path: /etc/apt/sources.list.d/spotify.list
-    content: deb [signed-by=/etc/apt/keyrings/spotify.gpg] https://repository.spotify.com stable non-free
+    dest: /etc/apt/sources.list.d/spotify.list
+    content: |
+      deb https://repository.spotify.com stable non-free
     force: false
+    mode: u=rw,g=r,o=r
 
 - name: Update APT cache
   become: true
@@ -34,3 +31,4 @@
   become: true
   ansible.builtin.apt:
     name: spotify-client
+    state: present

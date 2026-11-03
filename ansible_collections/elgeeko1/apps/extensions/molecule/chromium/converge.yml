@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: Apply elgeeko1.apps.chromium
+      ansible.builtin.include_role:
+        name: elgeeko1.apps.chromium

@@ -1,0 +1,11 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+
+    - name: Assert packages are installed
+      ansible.builtin.assert:
+        that:
+          - "'chromium' in ansible_facts.packages"

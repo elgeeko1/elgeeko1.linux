@@ -1,0 +1,40 @@
+# SPDX-FileCopyrightText: (c) 2021-2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+- name: Touch daemon.json
+  become: true
+  ansible.builtin.file:
+    path: /etc/docker/daemon.json
+    state: touch
+    modification_time: preserve
+    access_time: preserve
+    mode: u=rw,g=rw,o=r
+
+# an empty daemon.json, as created by the touch above, reads as an empty configuration
+- name: Load daemon.json
+  ansible.builtin.slurp:
+    src: /etc/docker/daemon.json
+  register:
+    _docker_r_daemon_original: (_task.result.content | b64decode or '{}') | from_json
+
+- name: Write daemon.json with the containerd snapshotter enabled
+  when: _docker_daemon_updated != _docker_r_daemon_original
+  notify: "elgeeko1.apps.docker : restart_docker"
+  become: true
+  vars:
+    _docker_daemon_updated: "{{ _docker_r_daemon_original | combine({'features': {'containerd-snapshotter': true}}) }}"
+  ansible.builtin.copy:
+    content: "{{ _docker_daemon_updated | to_nice_json }}"
+    dest: /etc/docker/daemon.json
+    backup: true
+    force: true
+    mode: u=rw,g=rw,o=r
+
+- name: Controller flush handlers
+  ansible.builtin.meta: flush_handlers

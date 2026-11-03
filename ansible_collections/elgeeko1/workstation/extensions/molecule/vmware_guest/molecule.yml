@@ -1,0 +1,41 @@
+---
+# releases that the role supports, a subset of the base matrix
+platforms:
+  - &systemd
+    name: ${MOLECULE_SCENARIO_NAME}-ubuntu2404
+    image: docker.io/geerlingguy/docker-ubuntu2404-ansible:latest
+    platform: linux/amd64
+    # pulls the requested platform, which shares its tag with the other architectures
+    pull: true
+    pre_build_image: true
+    privileged: true
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    # a privileged container shares binfmt_misc with the host, and stopping
+    # systemd-binfmt.service unregisters every host handler; systemd-udevd fails
+    # to start in the container, which fails the Debian 12 udev postinst
+    command: >-
+      /usr/sbin/init
+      systemd.mask=systemd-binfmt.service
+      systemd.mask=proc-sys-fs-binfmt_misc.automount
+      systemd.mask=systemd-udevd.service
+  - <<: *systemd
+    name: ${MOLECULE_SCENARIO_NAME}-ubuntu2604
+    image: docker.io/geerlingguy/docker-ubuntu2604-ansible:latest
+  - <<: *systemd
+    name: ${MOLECULE_SCENARIO_NAME}-debian12
+    image: docker.io/geerlingguy/docker-debian12-ansible:latest
+  - <<: *systemd
+    name: ${MOLECULE_SCENARIO_NAME}-debian13
+    image: docker.io/geerlingguy/docker-debian13-ansible:latest
+provisioner:
+  inventory:
+    group_vars:
+      all:
+        molecule_prepare_packages:
+          - gsettings-desktop-schemas
+          - libglib2.0-bin
+          - dbus-user-session
+          - dconf-gsettings-backend
+        molecule_prepare_user_session: true

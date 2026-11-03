@@ -9,15 +9,15 @@
 
 - name: Configure message of the day (motd)
   when: ubuntu_trim_motd
-  ansible.builtin.include_tasks: login-motd.yml
+  ansible.builtin.include_tasks: login_motd.yml
 
 - name: Apt disable unattended upgrades
   when: ubuntu_disable_unattended_upgrades
-  ansible.builtin.include_tasks: unattended-upgrades.yml
+  ansible.builtin.include_tasks: unattended_upgrades.yml
 
 - name: Disable error reporting
   when: ubuntu_disable_error_reporting
-  ansible.builtin.include_tasks: error-reporting.yml
+  ansible.builtin.include_tasks: error_reporting.yml
 
 - name: Disable Ubuntu Pro
   when: ubuntu_disable_pro
@@ -27,7 +27,7 @@
     state: absent
     purge: true
     autoremove: true
-    pkg:
+    name:
       - ubuntu-pro-client-l10n
       - ubuntu-pro-client
 

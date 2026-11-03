@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+- name: Debconf add code/add-microsoft-repo
+  become: true
+  ansible.builtin.debconf:
+    name: code
+    question: add-microsoft-repo
+    value: "true"
+    vtype: "boolean"
+
+# the code postinst keeps any .list or .sources file that already names the
+# repository, and Microsoft publishes its current signing key at a fixed URL,
+# which the module fetches every run into /etc/apt/keyrings
+- name: Configure Microsoft APT repository
+  register: _vscode_r_repo
+  become: true
+  ansible.builtin.deb822_repository:
+    install_python_debian: true
+    name: vscode
+    types: [deb]
+    uris: https://packages.microsoft.com/repos/code
+    suites: [stable]
+    components: [main]
+    architectures: ["{{ _vscode_apt_arch }}"]
+    signed_by: https://packages.microsoft.com/keys/microsoft.asc
+    state: present
+
+- name: Apt update cache
+  become: true
+  ansible.builtin.apt:
+    update_cache: "{{ _vscode_r_repo.changed }}"

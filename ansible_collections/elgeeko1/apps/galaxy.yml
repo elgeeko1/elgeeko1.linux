@@ -3,17 +3,21 @@
 ---
 namespace: elgeeko1
 name: apps
-version: 1.2.0
+version: 2.0.0
 readme: README.md
 authors:
   - Jeff C. Jensen <11233838+elgeeko1@users.noreply.github.com>
-description: "Linux apps collection."
+description: "Desktop and developer applications for Debian and Ubuntu hosts."
 license:
   - MIT
   - BSD-3-Clause
-tags: [linux, apps, ubuntu]
-dependencies: {}
+tags: [linux, apps, debian, ubuntu]
+dependencies:
+  community.docker: ">=5.2.0"
+  community.general: ">=14.0.0"
 repository: https://github.com/elgeeko1/elgeeko1.linux
+homepage: https://github.com/elgeeko1/elgeeko1.linux
+documentation: https://github.com/elgeeko1/elgeeko1.linux/blob/main/ansible_collections/elgeeko1/apps/README.md
 issues: https://github.com/elgeeko1/elgeeko1.linux/issues
 build_ignore:
   - .ansible

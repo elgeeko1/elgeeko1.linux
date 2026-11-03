@@ -1,53 +1,48 @@
-# elgeeko1.apps.docker - install docker
+# elgeeko1.apps.docker
+
+Installs Docker Engine from the Docker APT repository, with optional multi-architecture builds.
 
 ## Features
 
-- installs latest docker-ce
-- installs docker python module
-- installs docker-compose
-- (optional) installs support for docker buildx multiarchitecture builds
-- (optional) performs a docker system prune
+- Installs `docker-ce`, the CLI, rootless extras, and the buildx and compose plugins.
+- Installs the Docker Python module.
+- Adds the Ansible user to the `docker` group.
+- Installs QEMU and a buildx builder for multi-architecture builds.
+- Prunes containers, images, networks, volumes, and the build cache.
 
-## Role Variables
+## Requirements
 
-### multiarchitecture builds
+- The [collection requirements](../../README.md#requirements).
+- Collections: `community.docker`
 
-- `docker_multiarch`: install QEMU.
+## Role variables
 
-  Default: `false`
+<!-- BEGIN_ANSIBLE_DOCS -->
 
-- `docker_multiarch_containerd_snapshot`: use containerd-shapshot and create a buildx builder using the `docker-container` driver. Ignored if `docker_multiarch` is false.
+| Variable | Type | Default | Description |
+| -- | -- | -- | -- |
+| `docker_multiarch` | bool | `false` | Install QEMU for multi-architecture builds. |
+| `docker_multiarch_containerd_snapshot` | bool | `false` | Enable the containerd snapshotter and create a buildx builder with the `docker-container` driver; requires `docker_multiarch`. |
+| `docker_multiarch_containerd_builder_name` | str | `multiarch` | Name of the buildx builder. |
+| `docker_add_user_to_docker_group` | bool | `true` | Add `ansible_user` to the `docker` group. |
+| `docker_prune` | bool | `false` | Prune containers, images, networks, volumes, and the build cache. |
+| `docker_version` | str | - | `docker-ce`, `docker-ce-cli`, and `docker-ce-rootless-extras` version; unset installs the candidate. |
+| `docker_buildx_version` | str | - | `docker-buildx-plugin` version; unset installs the candidate. |
+| `docker_compose_version` | str | - | `docker-compose-plugin` version; unset installs the candidate. |
+| `docker_python_module_version` | str | - | `python3-docker` version; unset installs the candidate. |
 
-  Default: `false`
+<!-- END_ANSIBLE_DOCS -->
 
-- `docker_multiarch_containerd_builder_name`: docker buildx container name for multiarchitecture builds. Used only if `docker_multiarch` and `docker_multiarch_containerd_snapshot` are true.
+## Example playbook
 
-  Default: `multiarch`
+```yaml
+- name: Configure workstations
+  hosts: workstations
+  roles:
+    - role: elgeeko1.apps.docker
+```
 
-### Versions
+## License
 
-- `docker_version`: version of docker-ce to install.
-
-  Default: empty (latest)
-
-- `docker_buildx_version`: version of docker-buildx-plugin to install.
-
-  Default: empty (latest)
-
-- `docker_compose_version`: version of docker-compose-plugin to install.
-
-  Default: empty (latest)
-
-- `docker_python_module_version`: version of python3-docker package to install.
-
-  Default: empty (latest).
-
-### Convenience
-
-- `docker_prune`: prune docker containers, images and networks.
-
-  Default: `false`
-
-- `docker_add_user_to_docker_group`: Add current Ansible user to the docker group.
-
-  Default: `true`
+MIT. See [LICENSE](LICENSE). Portions are BSD-3-Clause; see
+[THIRD_PARTY_NOTICE.md](THIRD_PARTY_NOTICE.md).

@@ -1,0 +1,94 @@
+# Creates the unprivileged sudo user that converge and verify connect as, and
+# installs the desktop services that a scenario requests through inventory.
+---
+- name: Prepare
+  hosts: all
+  gather_facts: false
+  vars:
+    ansible_user: root
+  tasks:
+    # Ubuntu 26.04 mounts a tmpfs on /tmp during boot, which hides module files
+    # staged there earlier; raw stages no files. A degraded system exits 1.
+    - name: Wait for systemd to finish booting
+      changed_when: false
+      ansible.builtin.raw: systemctl is-system-running --wait || true
+
+    - name: Create user molecule
+      ansible.builtin.user:
+        name: molecule
+        uid: "{{ molecule_uid }}"
+        shell: /bin/bash
+        create_home: true
+        state: present
+
+    - name: Grant molecule passwordless sudo
+      ansible.builtin.copy:
+        dest: /etc/sudoers.d/molecule
+        content: "molecule ALL=(ALL) NOPASSWD:ALL\n"
+        mode: "0440"
+        validate: visudo -cf %s
+
+    # the image policy-rc.d exits 101, which stops package scripts from starting services
+    - name: Remove policy-rc.d
+      ansible.builtin.file:
+        path: /usr/sbin/policy-rc.d
+        state: absent
+
+    # the image ships with empty APT lists
+    - name: Update the APT cache
+      ansible.builtin.apt:
+        update_cache: true
+
+    # snap hooks require AppArmor, which the container exposes through securityfs
+    - name: Mount securityfs
+      when: "'snapd' in molecule_prepare_packages"
+      ansible.posix.mount:
+        path: /sys/kernel/security
+        src: securityfs
+        fstype: securityfs
+        state: ephemeral
+
+    - name: Gather distribution facts
+      ansible.builtin.setup:
+        gather_subset: [distribution]
+
+    # snapd in a Debian container fails to set up a loop device for each snap,
+    # and mounts snaps through squashfuse when it is installed
+    - name: Install squashfuse for snapd on Debian
+      when:
+        - "'snapd' in molecule_prepare_packages"
+        - ansible_facts['distribution'] == 'Debian'
+      ansible.builtin.apt:
+        name: [squashfuse, fuse3]
+        state: present
+
+    - name: Install scenario packages
+      when: molecule_prepare_packages | length > 0
+      ansible.builtin.apt:
+        name: "{{ molecule_prepare_packages }}"
+        state: present
+
+    - name: Start snapd
+      when: "'snapd' in molecule_prepare_packages"
+      ansible.builtin.systemd:
+        name: snapd.service
+        state: started
+
+    - name: Wait for snapd to seed
+      when: "'snapd' in molecule_prepare_packages"
+      changed_when: false
+      ansible.builtin.command:
+        cmd: snap wait system seed.loaded
+
+    # a lingering user gets a systemd user manager and a D-Bus session bus,
+    # which gsettings needs to persist settings through dconf
+    - name: Enable lingering for molecule
+      when: molecule_prepare_user_session
+      ansible.builtin.command:
+        cmd: loginctl enable-linger molecule
+        creates: /var/lib/systemd/linger/molecule
+
+    - name: Wait for the molecule session bus
+      when: molecule_prepare_user_session
+      ansible.builtin.wait_for:
+        path: /run/user/{{ molecule_uid }}/bus

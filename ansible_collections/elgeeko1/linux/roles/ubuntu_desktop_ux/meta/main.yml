@@ -9,15 +9,14 @@
 ---
 galaxy_info:
   author: Jeff C. Jensen <11233838+elgeeko1@users.noreply.github.com>
-  description: "Ubuntu Desktop usability tweaks. Uninstall productivity apps, error reporting and update notifications."
-  license: MIT
-  min_ansible_version: "2.16"
+  description: "Usability changes for Ubuntu Desktop."
+  license: "MIT AND BSD-3-Clause"
+  standalone: false
   platforms:
     - name: Ubuntu
-      versions: [jammy, noble]
+      versions: [jammy, noble, resolute]
     - name: Debian
-      versions: [bullseye, bookworm]
-  galaxy_tags: [linux, core, ubuntu, desktop, ux]
+      versions: [bookworm, trixie]
 
 collections:
   - ansible.posix

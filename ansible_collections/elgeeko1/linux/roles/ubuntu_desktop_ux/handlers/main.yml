@@ -8,4 +8,4 @@
 # and modifications by Xronos Inc. under BSD-3-Clause.
 ---
 - name: Import schedule reboot handler
-  ansible.builtin.import_tasks: schedule-reboot.yml
+  ansible.builtin.import_tasks: schedule_reboot.yml

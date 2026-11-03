@@ -1,0 +1,72 @@
+# Molecule base configuration for every scenario under
+# ansible_collections/elgeeko1/*/extensions/molecule. Run molecule from a
+# collection root, which sets MOLECULE_PROJECT_DIRECTORY.
+---
+dependency:
+  name: galaxy
+  enabled: false
+
+driver:
+  name: docker
+
+platforms:
+  # privileged systemd container; each entry below overrides name and image
+  - &systemd
+    name: ${MOLECULE_SCENARIO_NAME}-ubuntu2204
+    image: docker.io/geerlingguy/docker-ubuntu2204-ansible:latest
+    platform: linux/amd64
+    # pulls the requested platform, which shares its tag with the other architectures
+    pull: true
+    pre_build_image: true
+    privileged: true
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    # a privileged container shares binfmt_misc with the host, and stopping
+    # systemd-binfmt.service unregisters every host handler
+    command: >-
+      /usr/sbin/init
+      systemd.mask=systemd-binfmt.service
+      systemd.mask=proc-sys-fs-binfmt_misc.automount
+  - <<: *systemd
+    name: ${MOLECULE_SCENARIO_NAME}-ubuntu2404
+    image: docker.io/geerlingguy/docker-ubuntu2404-ansible:latest
+  - <<: *systemd
+    name: ${MOLECULE_SCENARIO_NAME}-ubuntu2604
+    image: docker.io/geerlingguy/docker-ubuntu2604-ansible:latest
+  - <<: *systemd
+    name: ${MOLECULE_SCENARIO_NAME}-debian12
+    image: docker.io/geerlingguy/docker-debian12-ansible:latest
+  - <<: *systemd
+    name: ${MOLECULE_SCENARIO_NAME}-debian13
+    image: docker.io/geerlingguy/docker-debian13-ansible:latest
+
+provisioner:
+  name: ansible
+  inventory:
+    group_vars:
+      all:
+        # unprivileged sudo user created by prepare.yml
+        ansible_user: molecule
+        # fixed so that scenarios can name /run/user/<uid> before facts exist
+        molecule_uid: 2000
+        # extra packages for prepare.yml to install
+        molecule_prepare_packages: []
+        # start a systemd user manager and session bus for molecule
+        molecule_prepare_user_session: false
+
+ansible:
+  cfg:
+    defaults:
+      stdout_callback: ansible.builtin.default
+      result_format: yaml
+      callbacks_enabled: profile_tasks
+  env:
+    # the repository root holds ansible_collections/elgeeko1, and collections/
+    # holds the dependencies installed from collections/requirements.yml
+    ANSIBLE_COLLECTIONS_PATH: ${MOLECULE_PROJECT_DIRECTORY}/../../..:${MOLECULE_PROJECT_DIRECTORY}/../../../collections
+  playbooks:
+    prepare: ${MOLECULE_PROJECT_DIRECTORY}/../../../.config/molecule/prepare.yml
+
+verifier:
+  name: ansible

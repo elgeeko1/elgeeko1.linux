@@ -1,0 +1,67 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+name: CI
+
+on:
+  push:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  quality:
+    name: quality
+    uses: ./.github/workflows/_quality.yml
+
+  scenarios:
+    name: scenarios
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.list.outputs.matrix }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: List Molecule scenarios
+        id: list
+        run: |
+          set -euo pipefail
+          matrix=$(
+            find ansible_collections/elgeeko1/*/extensions/molecule -mindepth 2 -maxdepth 2 -name molecule.yml \
+              | sort \
+              | jq -R -s -c '[splits("\n") | select(length > 0) | split("/")
+                  | {collection: .[2], scenario: .[5]}]'
+          )
+          echo "matrix=${matrix}" >> "${GITHUB_OUTPUT}"
+
+  molecule:
+    name: molecule (${{ matrix.collection }}.${{ matrix.scenario }})
+    needs: scenarios
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.scenarios.outputs.matrix) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: ./.github/actions/setup-python
+
+      - name: Run molecule
+        working-directory: ansible_collections/elgeeko1/${{ matrix.collection }}
+        env:
+          SCENARIO: ${{ matrix.scenario }}
+        run: molecule test -s "${SCENARIO}"

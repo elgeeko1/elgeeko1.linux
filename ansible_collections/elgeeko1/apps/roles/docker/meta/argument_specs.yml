@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+argument_specs:
+  main:
+    short_description: Install Docker Engine from the Docker APT repository, with optional multi-architecture builds
+    options:
+      docker_multiarch:
+        description: Install QEMU for multi-architecture builds.
+        type: bool
+        default: false
+      docker_multiarch_containerd_snapshot:
+        description: Enable the containerd snapshotter and create a buildx builder with the `docker-container` driver; requires `docker_multiarch`.
+        type: bool
+        default: false
+      docker_multiarch_containerd_builder_name:
+        description: Name of the buildx builder.
+        type: str
+        default: multiarch
+      docker_add_user_to_docker_group:
+        description: Add `ansible_user` to the `docker` group.
+        type: bool
+        default: true
+      docker_prune:
+        description: Prune containers, images, networks, volumes, and the build cache.
+        type: bool
+        default: false
+      docker_version:
+        description: "`docker-ce`, `docker-ce-cli`, and `docker-ce-rootless-extras` version; unset installs the candidate."
+        type: str
+      docker_buildx_version:
+        description: "`docker-buildx-plugin` version; unset installs the candidate."
+        type: str
+      docker_compose_version:
+        description: "`docker-compose-plugin` version; unset installs the candidate."
+        type: str
+      docker_python_module_version:
+        description: "`python3-docker` version; unset installs the candidate."
+        type: str

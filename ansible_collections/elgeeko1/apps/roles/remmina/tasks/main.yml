@@ -4,13 +4,9 @@
 - name: Install Remmina + FreeRDP
   become: true
   ansible.builtin.apt:
-    name:
-      - remmina
-      - freerdp2-x11
-      - freerdp2-wayland
-      - remmina-plugin-rdp
+    name: "{{ ['remmina', 'remmina-plugin-rdp'] + _remmina_freerdp_packages }}"
+    state: present
 
-# A) Global Remmina preferences
 - name: Ensure Remmina global config directory exists
   become: true
   ansible.builtin.file:
@@ -22,7 +18,7 @@
   become: true
   ansible.builtin.lineinfile:
     path: /etc/xdg/remmina/remmina.pref
-    regexp: '^hostkey='
-    line: 'hostkey=65507'   # Control_L
+    regexp: "^hostkey="
+    line: "hostkey=65507" # Control_L
     create: true
     mode: u=rw,go=r

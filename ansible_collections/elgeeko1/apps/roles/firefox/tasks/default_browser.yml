@@ -3,7 +3,7 @@
 ---
 - name: Set system default browser to Firefox (update-alternatives)
   become: true
-  ansible.builtin.alternatives:
+  community.general.alternatives:
     name: x-www-browser
     path: /usr/bin/firefox
 
@@ -34,7 +34,7 @@
   ansible.builtin.command: xdg-settings get default-web-browser
   environment:
     XDG_CURRENT_DESKTOP: GNOME
-    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ ansible_user_id }}/bus"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ ansible_facts['user_id'] }}/bus"
     DISPLAY: ":0"
 
 - name: Set Firefox as default browser (xdg-settings)
@@ -44,5 +44,5 @@
   ansible.builtin.command: xdg-settings set default-web-browser firefox.desktop
   environment:
     XDG_CURRENT_DESKTOP: GNOME
-    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ ansible_user_id }}/bus"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ ansible_facts['user_id'] }}/bus"
     DISPLAY: ":0"

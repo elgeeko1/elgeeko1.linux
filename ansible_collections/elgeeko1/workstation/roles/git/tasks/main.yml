@@ -1,9 +1,17 @@
 # SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
 # SPDX-License-Identifier: MIT
 ---
+- name: Validate git identity variables
+  ansible.builtin.assert:
+    that:
+      - git_github_username | default('', true) | length > 0
+      - git_github_email | default('', true) | length > 0
+    fail_msg: git_github_username and git_github_email must be set.
+    quiet: true
+
 - name: Configure git
   ansible.builtin.import_tasks: git.yml
-  
+
 - name: Configure gpg
   when: git_generate_gpg
   ansible.builtin.import_tasks: gpg.yml

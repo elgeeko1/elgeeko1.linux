@@ -1,11 +1,40 @@
-# elgeeko1.linux.ubuntu_desktop_ux - Ubuntu Desktop Usability
+# elgeeko1.linux.ubuntu_desktop_ux
+
+Usability changes for Ubuntu Desktop.
 
 ## Features
 
-- removes Libreoffice, Thunderbird and Rhythmbox
-- removes Gnome initial setup wizard
-- removes update notifier
-- removes problem reporting
-- uninstalls keychain management
+- Removes gnome-initial-setup, LibreOffice, Rhythmbox, and Thunderbird.
+- Disables GNOME technical problem reports and clears `/var/crash`.
+- Removes the update notifier.
+- Masks `systemd-networkd-wait-online`.
+- Enables the Nautilus location entry.
+- Adds a `desktop` alias that starts the graphical target.
+- Reboots when a change requires it.
 
-## Role Variables
+## Requirements
+
+- The [collection requirements](../../README.md#requirements).
+- Collections: `community.general`
+
+## Role variables
+
+<!-- BEGIN_ANSIBLE_DOCS -->
+
+None.
+
+<!-- END_ANSIBLE_DOCS -->
+
+## Example playbook
+
+```yaml
+- name: Configure workstations
+  hosts: workstations
+  roles:
+    - role: elgeeko1.linux.ubuntu_desktop_ux
+```
+
+## License
+
+MIT. See [LICENSE](LICENSE). Portions are BSD-3-Clause; see
+[THIRD_PARTY_NOTICE.md](THIRD_PARTY_NOTICE.md).

@@ -1,0 +1,31 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Stat the Tailscale auth key file
+      become: true
+      register: _verify_authkey
+      ansible.builtin.stat:
+        path: /opt/tailscale/authkey
+
+    - name: Read the Tailscale status
+      register: _verify_status
+      changed_when: false
+      ansible.builtin.command:
+        cmd: tailscale status --json
+
+    - name: Assert tailscaled runs and holds the auth key for tailscale up
+      ansible.builtin.assert:
+        that:
+          - "'tailscale' in ansible_facts.packages"
+          - ansible_facts.services['tailscaled.service'].state == 'running'
+          - _verify_authkey.stat.exists
+          - _verify_authkey.stat.pw_name == 'root'
+          - _verify_authkey.stat.mode == '0600'
+          - (_verify_status.stdout | from_json).BackendState == 'NeedsLogin'

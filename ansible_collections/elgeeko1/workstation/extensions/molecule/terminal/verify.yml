@@ -1,0 +1,25 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Read the sudoers rule for molecule
+      become: true
+      register: _verify_sudoers
+      ansible.builtin.slurp:
+        src: /etc/sudoers.d/molecule
+
+    - name: Assert the role granted passwordless sudo
+      ansible.builtin.assert:
+        that:
+          - "'(ALL:ALL)' in (_verify_sudoers.content | b64decode)"
+          - "'NOPASSWD' in (_verify_sudoers.content | b64decode)"
+
+    - name: Read ~/.bash_aliases
+      register: _verify_aliases
+      ansible.builtin.slurp:
+        src: "{{ ansible_facts['env']['HOME'] }}/.bash_aliases"
+
+    - name: Assert the update alias is present
+      ansible.builtin.assert:
+        that:
+          - "'alias update=' in (_verify_aliases.content | b64decode)"

@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+argument_specs:
+  main:
+    short_description: Configure git for a user, with an optional GPG signing key
+    options:
+      git_github_username:
+        description: "`user.name` and GPG key name."
+        type: str
+        required: true
+      git_github_email:
+        description: "`user.email` and GPG key email."
+        type: str
+        required: true
+      git_generate_gpg:
+        description: Generate a GPG key and sign commits and tags.
+        type: bool
+        default: true
+      git_editor:
+        description: "`core.editor`."
+        type: str
+        default: nano

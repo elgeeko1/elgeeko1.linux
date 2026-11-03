@@ -12,24 +12,26 @@
   ansible.builtin.package:
     name:
       - tzdata
+    state: present
 
 - name: Set timezone
-  when: core_timezone | length > 0
+  when: core_timezone | default('', true) | length > 0
   become: true
   community.general.timezone:
     name: "{{ core_timezone }}"
 
-- name: Package install ntp
+- name: Package install ntpsec
   when: core_ntp_enabled
   become: true
   ansible.builtin.package:
     name:
-      - ntp
+      - ntpsec
+    state: present
 
-- name: Enable ntp
+- name: Enable ntpsec
   when: core_ntp_enabled
   become: true
   ansible.builtin.service:
-    name: ntp
+    name: ntpsec
     state: started
     enabled: true

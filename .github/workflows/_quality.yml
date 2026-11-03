@@ -1,0 +1,56 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+# reusable workflow: lint and format checks
+name: Quality checks
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: ./.github/actions/setup-python
+
+      - name: ansible-lint
+        run: ansible-lint
+
+      - name: markdownlint
+        # image tag matches the markdownlint-cli2 rev in .pre-commit-config.yaml
+        run: >-
+          git ls-files -z "*.md" ":(exclude).agents/**" ":(exclude).claude/**"
+          | xargs -0r docker run --rm --volume "${PWD}:/workdir" davidanson/markdownlint-cli2:v0.24.0 --
+
+      - name: actionlint
+        # image tag matches the actionlint rev in .pre-commit-config.yaml
+        run: docker run --rm --volume "${PWD}:/repo" --workdir /repo docker.io/rhysd/actionlint:1.7.12 -color
+
+      - name: Role README variable tables
+        run: |
+          scripts/generate-role-docs.sh
+          git diff --exit-code
+
+      - name: lychee
+        # image tag matches the lychee rev in .pre-commit-config.yaml; --offline checks local links only
+        run: >-
+          git ls-files -z "*.md" ":(exclude).agents/**" ":(exclude).claude/**"
+          | xargs -0r docker run --rm --volume "${PWD}:/input" --workdir /input docker.io/lycheeverse/lychee:0.24.2
+          --offline --no-progress --
+
+      - name: mdformat
+        run: >-
+          git ls-files -z "*.md" ":(exclude).agents/**" ":(exclude).claude/**"
+          | xargs -0r mdformat --check

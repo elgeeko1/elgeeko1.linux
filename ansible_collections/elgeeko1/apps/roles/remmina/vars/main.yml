@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+# releases that ship only FreeRDP 2
+_remmina_freerdp2_releases: [jammy, bookworm]
+
+_remmina_freerdp_packages: >-
+  {{ ['freerdp2-x11', 'freerdp2-wayland']
+  if ansible_facts['distribution_release'] in _remmina_freerdp2_releases
+  else ['freerdp3-x11', 'freerdp3-wayland'] }}

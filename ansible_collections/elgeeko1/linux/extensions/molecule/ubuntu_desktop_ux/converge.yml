@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  environment:
+    XDG_RUNTIME_DIR: /run/user/{{ molecule_uid }}
+  tasks:
+    - name: Apply elgeeko1.linux.ubuntu_desktop_ux
+      ansible.builtin.include_role:
+        name: elgeeko1.linux.ubuntu_desktop_ux

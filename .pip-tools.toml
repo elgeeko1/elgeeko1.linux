@@ -1,0 +1,4 @@
+# keep index URLs from the user pip config out of requirements.txt
+[tool.pip-tools]
+emit-index-url = false
+strip-extras = true

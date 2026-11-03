@@ -1,16 +1,36 @@
-# elgeeko1.apps.zoom - install Zoom
+# elgeeko1.apps.zoom
+
+Installs the Zoom client from the Zoom deb package.
 
 ## Features
 
-- installs Zoom
-- (optional) disables autostart
+- Downloads and installs the Zoom deb.
+- Disables Zoom autostart on login.
 
-## Role Variables
+## Requirements
 
-- `zoom_version`: version number of Zoom to install.
+- The [collection requirements](../../README.md#requirements).
 
-  Default: `'latest'`
+## Role variables
 
-- `zoom_disable_autostart`: disable autostart of Zoom on user login.
+<!-- BEGIN_ANSIBLE_DOCS -->
 
-  Default: `true`
+| Variable | Type | Default | Description |
+| -- | -- | -- | -- |
+| `zoom_version` | str | `latest` | Zoom version in the download URL. |
+| `zoom_disable_autostart` | bool | `true` | Disable Zoom autostart on login. |
+
+<!-- END_ANSIBLE_DOCS -->
+
+## Example playbook
+
+```yaml
+- name: Configure workstations
+  hosts: workstations
+  roles:
+    - role: elgeeko1.apps.zoom
+```
+
+## License
+
+MIT. See [LICENSE](LICENSE).

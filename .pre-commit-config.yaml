@@ -1,0 +1,80 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+
+minimum_pre_commit_version: "3.5.0"
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: check-shebang-scripts-are-executable
+      - id: check-symlinks
+      - id: check-toml
+        # role templates are Jinja, rendered into TOML
+        exclude: /templates/
+      - id: check-yaml
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        name: Normalize line endings to LF
+        args: [--fix=lf]
+      - id: trailing-whitespace
+
+  # runs before mdformat so that the formatter sees the generated tables
+  - repo: local
+    hooks:
+      - id: generate-role-docs
+        name: Generate role README variable tables
+        entry: uv run scripts/generate-role-docs.sh
+        language: system
+        files: ^(\.aar_doc\.yml|ansible_collections/elgeeko1/[^/]+/roles/[^/]+/(README\.md|meta/argument_specs\.yml))$
+        pass_filenames: false
+
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 1.0.0
+    hooks:
+      - id: mdformat
+        # versions match requirements.in; .mdformat.toml sets compact tables
+        additional_dependencies:
+          - mdformat-gfm==1.0.0
+          - mdformat-frontmatter==2.2.0
+
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    # rev matches the image tag in .github/workflows/_quality.yml
+    rev: v0.24.0
+    hooks:
+      - id: markdownlint-cli2
+
+  - repo: https://github.com/lycheeverse/lychee
+    # rev matches the image tag in .github/workflows/_quality.yml
+    rev: lychee-v0.24.2
+    hooks:
+      - id: lychee-docker
+        args: [--offline, --no-progress]
+        types: [markdown]
+
+  # ansible-lint and ansible-core come from requirements.txt in the uv environment
+  - repo: local
+    hooks:
+      - id: ansible-lint
+        name: ansible-lint
+        entry: uv run ansible-lint
+        language: system
+        pass_filenames: false
+        always_run: true
+
+  - repo: https://github.com/rhysd/actionlint
+    # rev matches the image tag in .github/workflows/_quality.yml
+    rev: v1.7.12
+    hooks:
+      - id: actionlint
+
+# skip AI context, the vendored skill, and installed collection dependencies
+exclude: ^(\.agent-context/|\.agents/|\.claude/|collections/ansible_collections/)
+
+# run on commit and push
+default_stages: [pre-commit, pre-push]

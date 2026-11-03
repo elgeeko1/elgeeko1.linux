@@ -1,7 +1,33 @@
-# elgeeko1.apps.kicad - install KiCad
+# elgeeko1.apps.kicad
+
+Installs KiCad 9 from the KiCad releases PPA.
 
 ## Features
 
-- installs KiCad
+- Adds the `kicad/kicad-9.0-releases` PPA and installs `kicad`.
 
-## Role Variables
+## Requirements
+
+- The [collection requirements](../../README.md#requirements).
+- Ubuntu hosts only.
+
+## Role variables
+
+<!-- BEGIN_ANSIBLE_DOCS -->
+
+None.
+
+<!-- END_ANSIBLE_DOCS -->
+
+## Example playbook
+
+```yaml
+- name: Configure workstations
+  hosts: workstations
+  roles:
+    - role: elgeeko1.apps.kicad
+```
+
+## License
+
+MIT. See [LICENSE](LICENSE).

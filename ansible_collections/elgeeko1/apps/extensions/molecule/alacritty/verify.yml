@@ -1,0 +1,39 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: List the alacritty snap
+      changed_when: false
+      ansible.builtin.command:
+        cmd: snap list alacritty
+
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+
+    - name: Assert tmux is installed
+      ansible.builtin.assert:
+        that:
+          - "'tmux' in ansible_facts.packages"
+
+    - name: Stat the deployed configuration
+      loop:
+        - "{{ ansible_facts['env']['HOME'] }}/.config/alacritty/alacritty.toml"
+        - "{{ ansible_facts['env']['HOME'] }}/.tmux.conf"
+      register: _verify_configs
+      ansible.builtin.stat:
+        path: "{{ item }}"
+
+    - name: Assert the configuration files exist
+      ansible.builtin.assert:
+        that:
+          - _verify_configs.results | map(attribute='stat.exists') | min
+
+    - name: Read ~/.bash_aliases
+      register: _verify_aliases
+      ansible.builtin.slurp:
+        src: "{{ ansible_facts['env']['HOME'] }}/.bash_aliases"
+
+    - name: Assert the title function is present
+      ansible.builtin.assert:
+        that:
+          - "'title() {' in (_verify_aliases.content | b64decode)"

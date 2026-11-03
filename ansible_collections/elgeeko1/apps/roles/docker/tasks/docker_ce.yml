@@ -1,0 +1,58 @@
+# SPDX-FileCopyrightText: (c) 2021-2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+# Docker publishes its current signing key at a fixed URL; the module fetches
+# it every run into /etc/apt/keyrings and reports a change when the key changes
+- name: Configure Docker APT repository
+  register: _docker_r_repo
+  become: true
+  ansible.builtin.deb822_repository:
+    install_python_debian: true
+    name: docker
+    types: [deb]
+    uris: https://download.docker.com/{{ ansible_facts['system'] | lower }}/{{ ansible_facts['distribution'] | lower }}
+    suites: "{{ ansible_facts['distribution_release'] }}"
+    components: [stable]
+    signed_by: https://download.docker.com/{{ ansible_facts['system'] | lower }}/{{ ansible_facts['distribution'] | lower }}/gpg
+    state: present
+
+- name: Apt update cache
+  become: true
+  ansible.builtin.apt:
+    update_cache: "{{ _docker_r_repo.changed }}"
+
+- name: Apt install docker {{ docker_version if docker_version else 'latest' }}
+  become: true
+  ansible.builtin.apt:
+    name:
+      - docker-ce{{ '=' ~ docker_version if docker_version else '' }}
+      - docker-ce-cli{{ '=' ~ docker_version if docker_version else '' }}
+      - docker-ce-rootless-extras{{ '=' ~ docker_version if docker_version else '' }}
+      - docker-buildx-plugin{{ '=' ~ docker_buildx_version if docker_buildx_version else '' }}
+      - docker-compose-plugin{{ '=' ~ docker_compose_version if docker_compose_version else '' }}
+    state: present
+
+- name: Apt install docker module for python {{ docker_python_module_version if docker_python_module_version else 'latest' }}
+  become: true
+  ansible.builtin.apt:
+    name: python3-docker{{ '=' ~ docker_python_module_version if docker_python_module_version else '' }}
+    state: present
+
+- name: Add append docker group to {{ ansible_user }}
+  when: docker_add_user_to_docker_group
+  notify: "elgeeko1.apps.docker : reset_connection"
+  become: true
+  ansible.builtin.user:
+    name: "{{ ansible_user }}"
+    groups:
+      - docker
+    append: true
+
+- name: Controller flush handlers
+  ansible.builtin.meta: flush_handlers

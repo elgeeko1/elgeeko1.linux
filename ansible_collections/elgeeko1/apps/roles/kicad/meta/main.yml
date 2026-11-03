@@ -3,15 +3,12 @@
 ---
 galaxy_info:
   author: Jeff C. Jensen <11233838+elgeeko1@users.noreply.github.com>
-  description: "Install KiCad into Linux systems."
+  description: "Install KiCad 9 from the KiCad releases PPA."
   license: MIT
-  min_ansible_version: "2.16"
+  standalone: false
   platforms:
     - name: Ubuntu
-      versions: [jammy, noble]
-    - name: Debian
-      versions: [bullseye, bookworm]
-  galaxy_tags: [linux, apps, kicad]
+      versions: [jammy, noble, resolute]
 
 collections:
   - community.general

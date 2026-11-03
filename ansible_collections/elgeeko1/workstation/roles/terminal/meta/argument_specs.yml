@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+argument_specs:
+  main:
+    short_description: Configure shell conveniences for a user
+    options:
+      terminal_user:
+        description: User whose sudo rights the role configures; defaults to `ansible_user`, then `ansible_ssh_user`, then `$USER` on the controller.
+        type: str
+      terminal_sudo_nopassword:
+        description: Grant `terminal_user` passwordless sudo; `false` leaves an existing grant in place.
+        type: bool
+        default: false

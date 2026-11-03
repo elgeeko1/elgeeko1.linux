@@ -1,4 +1,16 @@
 ---
+- name: Stat ~/.cache
+  register: _zoom_r_cache_dir
+  ansible.builtin.stat:
+    path: "{{ ansible_facts['env']['HOME'] }}/.cache"
+
+- name: Create ~/.cache
+  when: not _zoom_r_cache_dir.stat.exists
+  ansible.builtin.file:
+    path: "{{ ansible_facts['env']['HOME'] }}/.cache"
+    state: directory
+    mode: u=rwx,g=,o=
+
 - name: Download Zoom .deb {{ zoom_version }}
   ansible.builtin.get_url:
     url: "{{ _zoom_deb_url }}"
@@ -10,6 +22,7 @@
   become: true
   ansible.builtin.apt:
     deb: "{{ _zoom_deb_path }}"
+    state: present
 
 - name: Disable autostart
   when: zoom_disable_autostart

@@ -7,14 +7,7 @@
 # This file contains portions from Jeff C. Jensen under MIT
 # and modifications by Xronos Inc. under BSD-3-Clause.
 ---
-# remove clutter from motd?
 ubuntu_trim_motd: false
-
-# disable unattended upgrades?
 ubuntu_disable_unattended_upgrades: true
-
-# disable error reporting services?
 ubuntu_disable_error_reporting: true
-
-# disable Ubuntu Pro?
 ubuntu_disable_pro: true

@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+argument_specs:
+  main:
+    short_description: Bootstrap SSH access for a user
+    options:
+      ssh_server_user:
+        description: User that owns the keypair and the authorized keys; defaults to `ansible_user`, then `ansible_ssh_user`, then `$USER` on the controller.
+        type: str
+      ssh_server_github_username:
+        description: GitHub user whose keys from `https://github.com/<user>.keys` are authorized; unset skips the import.
+        type: str

@@ -1,0 +1,26 @@
+---
+- name: Verify
+  hosts: all
+  environment:
+    XDG_RUNTIME_DIR: /run/user/{{ molecule_uid }}
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+
+    - name: Assert packages are removed
+      ansible.builtin.assert:
+        that:
+          - "'gnome-initial-setup' not in ansible_facts.packages"
+          - "'rhythmbox' not in ansible_facts.packages"
+          - "'update-notifier' not in ansible_facts.packages"
+
+    - name: Read the GNOME technical problem report setting
+      register: _verify_reports
+      changed_when: false
+      ansible.builtin.command:
+        cmd: gsettings get org.gnome.desktop.privacy report-technical-problems
+
+    - name: Assert technical problem reports are disabled
+      ansible.builtin.assert:
+        that:
+          - _verify_reports.stdout == 'false'

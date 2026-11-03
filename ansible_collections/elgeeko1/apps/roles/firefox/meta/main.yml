@@ -3,15 +3,12 @@
 ---
 galaxy_info:
   author: Jeff C. Jensen <11233838+elgeeko1@users.noreply.github.com>
-  description: "Install Firefox into Linux systems."
+  description: "Install Firefox as a deb package from the Mozilla Team PPA in place of the snap."
   license: MIT
-  min_ansible_version: "2.16"
+  standalone: false
   platforms:
     - name: Ubuntu
-      versions: [jammy, noble]
-    - name: Debian
-      versions: [bullseye, bookworm]
-  galaxy_tags: [linux, apps, firefox]
+      versions: [jammy, noble, resolute]
 
 collections:
   - community.general

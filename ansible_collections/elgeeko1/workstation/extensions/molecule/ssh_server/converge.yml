@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: Apply elgeeko1.workstation.ssh_server
+      ansible.builtin.include_role:
+        name: elgeeko1.workstation.ssh_server
+      vars:
+        ssh_server_github_username: elgeeko1

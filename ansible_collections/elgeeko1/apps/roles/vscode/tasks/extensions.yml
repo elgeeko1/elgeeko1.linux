@@ -8,7 +8,7 @@
 # and modifications by Xronos Inc. under BSD-3-Clause.
 ---
 - name: Install VS Code extensions
-  with_items: "{{ vscode_extensions }}"
+  loop: "{{ vscode_extensions }}"
   register: _vscode_r_extension_install
   changed_when: "'successfully installed' in _vscode_r_extension_install.stdout"
   failed_when:
@@ -19,12 +19,12 @@
 
 - name: Create directory ~/.vscode-server
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.vscode-server"
+    path: "{{ ansible_facts['env']['HOME'] }}/.vscode-server"
     state: directory
     mode: u=rwx,g=rx,o=
 
 - name: Install VS Code server extensions
-  with_items: "{{ vscode_extensions }}"
+  loop: "{{ vscode_extensions }}"
   register: _vscode_r_extension_install
   changed_when: "'successfully installed' in _vscode_r_extension_install.stdout"
   failed_when:
@@ -33,5 +33,5 @@
   ansible.builtin.command:
     cmd: >-
       code
-      --extensions-dir {{ ansible_env.HOME }}/.vscode-server/extensions
+      --extensions-dir {{ ansible_facts['env']['HOME'] }}/.vscode-server/extensions
       --install-extension {{ item }}

@@ -1,0 +1,21 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+
+    - name: Assert packages are installed
+      ansible.builtin.assert:
+        that:
+          - "'zoom' in ansible_facts.packages"
+
+    - name: Stat the Zoom autostart override
+      register: _verify_autostart
+      ansible.builtin.stat:
+        path: "{{ ansible_facts['env']['HOME'] }}/.config/autostart/Zoom.desktop"
+
+    - name: Assert the Zoom autostart override exists
+      ansible.builtin.assert:
+        that:
+          - _verify_autostart.stat.exists

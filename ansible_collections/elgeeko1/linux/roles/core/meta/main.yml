@@ -3,15 +3,14 @@
 ---
 galaxy_info:
   author: Jeff C. Jensen <11233838+elgeeko1@users.noreply.github.com>
-  description: "Baseline Linux configuration (packages, sshd, user folders)."
-  license: MIT
-  min_ansible_version: "2.16"
+  description: "Baseline configuration for Debian and Ubuntu hosts."
+  license: "MIT AND BSD-3-Clause"
+  standalone: false
   platforms:
     - name: Ubuntu
-      versions: [jammy, noble]
+      versions: [jammy, noble, resolute]
     - name: Debian
-      versions: [bullseye, bookworm]
-  galaxy_tags: [linux, core, baseline]
+      versions: [bookworm, trixie]
 
 collections:
   - ansible.posix

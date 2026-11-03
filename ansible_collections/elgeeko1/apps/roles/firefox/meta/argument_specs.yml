@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+argument_specs:
+  main:
+    short_description: Install Firefox as a deb package from the Mozilla Team PPA in place of the snap
+    options:
+      firefox_set_default_browser:
+        description: Set Firefox as the default browser.
+        type: bool
+        default: true

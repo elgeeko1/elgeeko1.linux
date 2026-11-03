@@ -1,0 +1,34 @@
+{
+  "editor.formatOnSave": true,
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
+  "files.associations": {
+    // playbooks that .ansible-lint lints under the playbook kind
+    "**/extensions/molecule/*/{converge,side_effect,verify}.yml": "ansible",
+    "**/.config/molecule/prepare.yml": "ansible",
+    ".ansible-lint": "yaml"
+  },
+  "files.watcherExclude": {
+    "**/.ansible/**": true,
+    "**/.venv/**": true,
+    "**/collections/ansible_collections/**": true
+  },
+  "[ansible]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
+    // MD013 line_length in .markdownlint.jsonc
+    "editor.rulers": [100]
+  },
+  // line-length max in the yamllint config that ansible-lint applies
+  "yaml.format.printWidth": 160,
+  "ansible.python.interpreterPath": "${workspaceFolder}/.venv/bin/python",
+  // ansible-lint --fix dedents the mapping under an anchored sequence item such as "- &systemd"
+  "ansible.validation.lint.autoFixOnSave": false
+}

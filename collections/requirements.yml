@@ -1,0 +1,12 @@
+# Collections used by the elgeeko1 roles and their Molecule tests.
+# Install with: ansible-galaxy collection install -r collections/requirements.yml
+---
+collections:
+  - name: ansible.posix
+    version: ">=2.2.0"
+  - name: community.crypto
+    version: ">=3.0.0"
+  - name: community.docker
+    version: ">=5.2.0"
+  - name: community.general
+    version: ">=14.0.0"

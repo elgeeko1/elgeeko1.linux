@@ -1,5 +1,6 @@
 ---
 - name: Append password-less sudoers with user '{{ terminal_user }}'
+  when: terminal_sudo_nopassword
   become: true
   community.general.sudoers:
     name: "{{ terminal_user }}"
@@ -11,48 +12,15 @@
 
 - name: Add 'update' alias to .bash_aliases
   ansible.builtin.lineinfile:
-    path: "{{ ansible_env.HOME }}/.bash_aliases"
-    regexp: "^update=*"
-    line: "alias update='sudo apt update -q \
-              && sudo apt upgrade -y -q \
-              && sudo apt dist-upgrade -y -q \
-              && sudo apt autoremove -y -q \
-              && sudo snap refresh'"
+    path: "{{ ansible_facts['env']['HOME'] }}/.bash_aliases"
+    regexp: "^alias update="
+    line: "alias update='sudo apt update -q && sudo apt upgrade -y -q && sudo apt dist-upgrade -y -q && sudo apt autoremove -y -q && sudo snap refresh'"
     create: true
-    mode: u=rwx,g=rx,o=
+    mode: u=rw,g=r,o=r
 
 - name: Append '/' to symlink directories
   ansible.builtin.lineinfile:
-    path: "{{ ansible_env.HOME }}/.bashrc"
+    path: "{{ ansible_facts['env']['HOME'] }}/.bashrc"
     regexp: "^bind 'set mark-symlinked-directories*'"
     line: "bind 'set mark-symlinked-directories on'"
     create: false
-
-- name: Add "title()" shell function to ~/.bash_aliases
-  ansible.builtin.blockinfile:
-    path: "{{ ansible_env.HOME }}/.bash_aliases"
-    create: true
-    mode: u=rw,go=r
-    marker: "# {mark} ANSIBLE MANAGED: title() function"
-    block: |
-      title() {
-        local title_str="${*:-}"
-
-        # strip 'sudo' prefix if present
-        title_str="${title_str#sudo }"
-
-        if [[ -n "${TMUX:-}" ]]; then
-          # set tmux per-pane title (used by pane_title)
-          tmux select-pane -T "$title_str"
-        else
-          # outside tmux: set terminal title via OSC 0
-          printf '\033]0;%s\007' "$title_str"
-        fi
-      }
-
-- name: Reset pane title in .bashrc
-  ansible.builtin.lineinfile:
-    path: "{{ ansible_env.HOME }}/.bashrc"
-    line: "command -v title >/dev/null 2>&1 && title || true"
-    create: false
-    

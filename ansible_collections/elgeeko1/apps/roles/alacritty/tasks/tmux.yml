@@ -5,9 +5,11 @@
   become: true
   ansible.builtin.package:
     name: tmux
+    state: present
 
 - name: Deploy tmux configuration
+  when: alacritty_tmux_config_template | length > 0
   ansible.builtin.template:
-    src: tmux.conf
-    dest: "{{ ansible_env.HOME }}/.tmux.conf"
+    src: "{{ alacritty_tmux_config_template }}"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.tmux.conf"
     mode: u=rw,g=,o=

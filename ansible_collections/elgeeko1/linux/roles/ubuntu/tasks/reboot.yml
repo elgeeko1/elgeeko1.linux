@@ -20,6 +20,8 @@
     - _ubuntu_r_reboot.stat.exists
     - inventory_hostname != "localhost"
     - (ansible_connection | default('smart')) != 'local'
+  # tagged molecule-notest because a reboot ends the test container
+  tags: [molecule-notest]
   become: true
   ansible.builtin.reboot:
     msg: "elgeeko1.linux.ubuntu : reboot"

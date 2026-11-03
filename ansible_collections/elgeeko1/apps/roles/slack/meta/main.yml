@@ -3,15 +3,14 @@
 ---
 galaxy_info:
   author: Jeff C. Jensen <11233838+elgeeko1@users.noreply.github.com>
-  description: "Install Slack into Linux systems."
+  description: "Install Slack from the Snap Store."
   license: MIT
-  min_ansible_version: "2.16"
+  standalone: false
   platforms:
     - name: Ubuntu
-      versions: [jammy, noble]
+      versions: [jammy, noble, resolute]
     - name: Debian
-      versions: [bullseye, bookworm]
-  galaxy_tags: [linux, apps, slack]
+      versions: [bookworm, trixie]
 
 collections:
   - community.general

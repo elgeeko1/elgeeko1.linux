@@ -1,7 +1,33 @@
-# elgeeko1.apps.slack - install Slack
+# elgeeko1.apps.slack
+
+Installs Slack from the Snap Store.
 
 ## Features
 
-- installs Slack
+- Installs the `slack` snap from the stable channel with classic confinement.
 
-## Role Variables
+## Requirements
+
+- The [collection requirements](../../README.md#requirements).
+- Collections: `community.general`
+
+## Role variables
+
+<!-- BEGIN_ANSIBLE_DOCS -->
+
+None.
+
+<!-- END_ANSIBLE_DOCS -->
+
+## Example playbook
+
+```yaml
+- name: Configure workstations
+  hosts: workstations
+  roles:
+    - role: elgeeko1.apps.slack
+```
+
+## License
+
+MIT. See [LICENSE](LICENSE).

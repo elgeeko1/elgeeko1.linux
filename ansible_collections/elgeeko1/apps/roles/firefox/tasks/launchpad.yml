@@ -1,23 +1,35 @@
 # SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
 # SPDX-License-Identifier: MIT
 ---
-- name: Fetch Launchpad PPA keys (ASCII)
+# keyserver responses differ between nodes, so the key downloads only once
+- name: Stat Launchpad PPA keys
   loop:
-    - { name: "launchpad-ppa",     url: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xAEBDF4819BE21867" }
+    - { name: "launchpad-ppa", url: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xAEBDF4819BE21867" }
     - { name: "launchpad-ppa-old", url: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x9BDB3D89CE49EC21" }
   register: _firefox_launchpad_keys
+  ansible.builtin.stat:
+    path: "/etc/apt/keyrings/{{ item.name }}.asc"
+
+- name: Fetch Launchpad PPA keys (ASCII)
+  loop: "{{ _firefox_launchpad_keys.results | rejectattr('stat.exists') | map(attribute='item') }}"
   become: true
   ansible.builtin.get_url:
     url: "{{ item.url }}"
     dest: "/etc/apt/keyrings/{{ item.name }}.asc"
     mode: u=rw,g=r,o=r
 
+- name: Install gpg
+  become: true
+  ansible.builtin.apt:
+    name: gpg
+    state: present
+
 - name: Dearmor Launchpad PPA keys
   loop:
     - { name: "launchpad-ppa" }
     - { name: "launchpad-ppa-old" }
   become: true
-  ansible.builtin.shell: >
+  ansible.builtin.command: >
     gpg --dearmor
     --output /etc/apt/keyrings/{{ item.name }}.gpg
     /etc/apt/keyrings/{{ item.name }}.asc

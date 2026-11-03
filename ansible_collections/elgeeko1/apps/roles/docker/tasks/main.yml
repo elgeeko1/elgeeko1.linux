@@ -8,14 +8,13 @@
 # and modifications by Xronos Inc. under BSD-3-Clause.
 ---
 - name: Apt update cache
-  when: ansible_distribution == "Ubuntu"
   become: true
   ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 3600 # 1 hr
 
 - name: Install docker engine
-  ansible.builtin.import_tasks: docker-ce.yml
+  ansible.builtin.import_tasks: docker_ce.yml
 
 - name: Configure docker for multiarch building
   when: docker_multiarch
@@ -23,7 +22,7 @@
 
 - name: Docker prune
   when: docker_prune
-  become: true  # ansible_user may not yet be in docker group
+  become: true # ansible_user may not yet be in docker group
   community.docker.docker_prune:
     builder_cache: true
     containers: true

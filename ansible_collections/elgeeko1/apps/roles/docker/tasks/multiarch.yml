@@ -12,8 +12,8 @@
 
 - name: Configure docker daemon for containerd-snapshotter
   when: docker_multiarch_containerd_snapshot
-  ansible.builtin.include_tasks: containerd-daemon.yml
-  
+  ansible.builtin.include_tasks: containerd_daemon.yml
+
 - name: Configure docker buildx builder
   when: docker_multiarch_containerd_snapshot
-  ansible.builtin.include_tasks: containerd-builder.yml
+  ansible.builtin.include_tasks: containerd_builder.yml

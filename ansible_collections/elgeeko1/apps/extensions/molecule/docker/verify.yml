@@ -1,0 +1,55 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+
+    - name: Assert packages are installed
+      ansible.builtin.assert:
+        that:
+          - "'docker-ce' in ansible_facts.packages"
+          - "'docker-buildx-plugin' in ansible_facts.packages"
+          - "'docker-compose-plugin' in ansible_facts.packages"
+          - "'python3-docker' in ansible_facts.packages"
+
+    - name: Read groups of the Ansible user
+      register: _verify_groups
+      changed_when: false
+      ansible.builtin.command:
+        cmd: id -nG
+
+    - name: Assert the Ansible user is in the docker group
+      ansible.builtin.assert:
+        that:
+          - "'docker' in _verify_groups.stdout.split()"
+
+    - name: Query the Docker daemon as the Ansible user
+      changed_when: false
+      ansible.builtin.command:
+        cmd: docker info
+
+    - name: Find APT sources that name https://download.docker.com/linux
+      register: _verify_sources
+      changed_when: false
+      failed_when: _verify_sources.rc > 1
+      ansible.builtin.command:
+        cmd: grep -rlF --include=*.list --include=*.sources https://download.docker.com/linux /etc/apt
+
+    - name: Assert only /etc/apt/sources.list.d/docker.sources names the repository
+      ansible.builtin.assert:
+        that:
+          - _verify_sources.stdout_lines == ['/etc/apt/sources.list.d/docker.sources']
+
+    - name: Update the APT cache
+      become: true
+      register: _verify_apt_update
+      changed_when: false
+      # the apt module returns no stderr from a cache update, which hides W: and E: lines
+      ansible.builtin.command:  # noqa: command-instead-of-module
+        cmd: apt-get update
+
+    - name: Assert apt-get update reports no warnings or errors
+      ansible.builtin.assert:
+        that:
+          - _verify_apt_update.stderr_lines | select('match', '^(W|E):') | list | length == 0

@@ -8,12 +8,13 @@
   register: _firefox_deb
   become: true
   ansible.builtin.deb822_repository:
+    install_python_debian: true
     name: mozillateam
     types: [deb]
     uris: ["https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu"]
-    suites: ["{{ ansible_distribution_release }}"]
+    suites: ["{{ ansible_facts['distribution_release'] }}"]
     components: ["main"]
-    signed_by: "/etc/apt/keyrings/launchpad-ppa.gpg /etc/apt/keyrings/launchpad-ppa-old.gpg"
+    signed_by: "/etc/apt/keyrings/launchpad-ppa.gpg"
 
 - name: Apt update cache
   become: true

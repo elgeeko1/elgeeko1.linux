@@ -3,15 +3,12 @@
 ---
 galaxy_info:
   author: Jeff C. Jensen <11233838+elgeeko1@users.noreply.github.com>
-  description: "Install Spotify into Linux systems."
+  description: "Install the Spotify client from the Spotify APT repository."
   license: MIT
-  min_ansible_version: "2.16"
+  standalone: false
   platforms:
     - name: Ubuntu
-      versions: [jammy, noble]
-    - name: Debian
-      versions: [bullseye, bookworm]
-  galaxy_tags: [linux, apps, spotify]
+      versions: [noble, resolute]
 
 collections:
   - community.general

@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+argument_specs:
+  main:
+    short_description: Install Visual Studio Code from the Microsoft APT repository, with extensions
+    options:
+      vscode_version:
+        description: "`code` package version; unset installs the candidate."
+        type: str
+      vscode_extensions:
+        description: Extension identifiers to install.
+        type: list
+        elements: str
+        default: []

@@ -1,0 +1,22 @@
+# python development requirements source
+# compile with pip-compile requirements.in
+
+# ansible
+ansible-core>=2.22,<2.23
+ansible-lint
+
+# role tests
+molecule
+molecule-plugins[docker]
+
+# role README variable tables, generated from meta/argument_specs.yml
+aar-doc
+
+# linting and formatting - markdown
+mdformat==1.0.0
+mdformat-gfm==1.0.0
+mdformat-frontmatter==2.2.0
+
+# repo tools
+pip-tools
+pre-commit

@@ -8,6 +8,12 @@
     dest: /etc/apt/keyrings/google-linux-signing-key.pub
     mode: "0644"
 
+- name: Install gpg
+  become: true
+  ansible.builtin.apt:
+    name: gpg
+    state: present
+
 - name: Dearmor GPG signing key
   become: true
   ansible.builtin.command:
@@ -18,20 +24,27 @@
   args:
     creates: /etc/apt/keyrings/google-linux-signing.gpg
 
+# the google-chrome-stable postinst and its daily cron job rewrite
+# google-chrome.sources, so the role creates it once and leaves later rewrites in place
 - name: Add Google Chrome APT repository
   register: _chrome_repo
   become: true
-  ansible.builtin.apt_repository:
-    repo: >-
-      deb [arch=amd64 signed-by=/etc/apt/keyrings/google-linux-signing.gpg]
-      https://dl.google.com/linux/chrome/deb/ stable main
-    filename: google-chrome
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/google-chrome.sources
+    content: |
+      Types: deb
+      URIs: https://dl.google.com/linux/chrome-stable/deb/
+      Suites: stable
+      Components: main
+      Architectures: amd64
+      Signed-By: /etc/apt/keyrings/google-linux-signing.gpg
+    force: false
+    mode: u=rw,g=r,o=r
 
 - name: Apt update cache
-  when: _chrome_repo.changed
   become: true
   ansible.builtin.apt:
-    update_cache: true
+    update_cache: "{{ _chrome_repo.changed }}"
 
 - name: Install Google Chrome
   become: true

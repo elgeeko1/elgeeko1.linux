@@ -5,17 +5,27 @@
   become: true
   ansible.builtin.package:
     name: gnupg
+    state: present
+
+- name: Stat {{ _git_gpg_export_dir }}
+  register: _git_r_export_dir
+  ansible.builtin.stat:
+    path: "{{ _git_gpg_export_dir }}"
+
+- name: Create {{ _git_gpg_export_dir }}
+  when: not _git_r_export_dir.stat.exists
+  ansible.builtin.file:
+    path: "{{ _git_gpg_export_dir }}"
+    state: directory
+    mode: u=rwx,g=,o=
 
 - name: Check if a gpg secret key already exists for {{ git_github_email }}
-  register: _git_r_gpg_key_list
+  register:
+    _git_r_gpg_key_exists: _task.result.stdout | regex_search('^sec') is not none
   changed_when: false
   failed_when: false
   ansible.builtin.command:
     cmd: "gpg --batch --with-colons --list-secret-keys {{ git_github_email }}"
-
-- name: Set fact _git_r_gpg_key_exists
-  ansible.builtin.set_fact:
-    _git_r_gpg_key_exists: "{{ _git_r_gpg_key_list.stdout | regex_search('^sec') is not none }}"
 
 - name: Build non-interactive ed25519 gpg key-parameter file
   ansible.builtin.copy:
@@ -40,20 +50,17 @@
   ansible.builtin.command:
     cmd: "gpg --batch --generate-key {{ _git_gpg_export_dir }}/{{ _git_gpg_key_name }}.keybatch"
 
-- name: List keys of the gpg key
-  register: _git_gpg_list
+- name: Read the fingerprint of the first gpg key
+  register:
+    _git_r_gpg_fingerprint: (_task.result.stdout_lines | select('match', '^fpr') | first).split(':')[9]
   changed_when: false
   ansible.builtin.command:
     cmd: "gpg --batch --with-colons --list-secret-keys {{ git_github_email }}"
 
-- name: Extract gpg fingerprint of first key
-  ansible.builtin.set_fact:
-    _git_r_gpg_fingerprint: "{{ (_git_gpg_list.stdout_lines | select('match','^fpr') | list).0.split(':')[9] }}"
-
 - name: Export armoured public gpg key
   register: _git_r_gpg_key_export
   changed_when: false
-  ansible.builtin.shell:
+  ansible.builtin.command:
     cmd: "gpg --armor --export {{ _git_r_gpg_fingerprint }}"
 
 - name: Write armoured public gpg key to {{ _git_gpg_export_dir }}
@@ -82,7 +89,7 @@
 
 - name: Set GPG_TTY in .bashrc
   ansible.builtin.lineinfile:
-    path: "{{ ansible_env.HOME }}/.bashrc"
+    path: "{{ ansible_facts['env']['HOME'] }}/.bashrc"
     regexp: "^export GPG_TTY*'"
     line: "export GPG_TTY=$(tty)"
     create: false

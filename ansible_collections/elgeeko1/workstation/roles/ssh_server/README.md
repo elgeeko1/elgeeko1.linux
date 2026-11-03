@@ -1,19 +1,41 @@
-# elgeeko1.workstation.ssh_server — SSH Key Bootstrap
+# elgeeko1.workstation.ssh_server
 
-This role bootstraps SSH access for a user on a Linux host.
+Bootstraps SSH access for a user.
 
 ## Features
 
-- Installs OpenSSH client
-- Creates ~/.ssh with secure permissions
-- Generates an ed25519 keypair if missing
-- Pulls the host’s public key back to the controller for inventory/ops
-- Optionally imports GitHub public keys for a specified username into authorized_keys
+- Installs the OpenSSH client and creates `~/.ssh`.
+- Generates an ed25519 keypair when none exists.
+- Copies the public key to `keys/ssh` next to the playbook on the controller.
+- Authorizes the public keys of a GitHub user.
 
-## Role Variables
+## Requirements
 
-- `ssh_server_user`: The remote user who owns the SSH keypair and receives authorized keys.
-  
-  Default behavior: falls back to the current Ansible connection user (or the remote `$USER`).
+- The [collection requirements](../../README.md#requirements).
+- Collections: `ansible.posix`, `community.crypto`
 
-- `ssh_server_github_username`: GitHub username whose keys (from `https://github.com/<user>.keys`) are authorized for ssh_server_user. If unset/empty or the fetch isn’t HTTP 200, this step is skipped.
+## Role variables
+
+<!-- BEGIN_ANSIBLE_DOCS -->
+
+| Variable | Type | Default | Description |
+| -- | -- | -- | -- |
+| `ssh_server_user` | str | - | User that owns the keypair and the authorized keys; defaults to `ansible_user`, then `ansible_ssh_user`, then `$USER` on the controller. |
+| `ssh_server_github_username` | str | - | GitHub user whose keys from `https://github.com/<user>.keys` are authorized; unset skips the import. |
+
+<!-- END_ANSIBLE_DOCS -->
+
+## Example playbook
+
+```yaml
+- name: Configure workstations
+  hosts: workstations
+  roles:
+    - role: elgeeko1.workstation.ssh_server
+      vars:
+        ssh_server_github_username: octocat
+```
+
+## License
+
+MIT. See [LICENSE](LICENSE).

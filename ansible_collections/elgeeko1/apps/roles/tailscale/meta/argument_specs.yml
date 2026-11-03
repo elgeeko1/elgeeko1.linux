@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+argument_specs:
+  main:
+    short_description: Install Tailscale and bring the node up with an auth key
+    options:
+      tailscale_auth_key:
+        description: Auth key written to `/opt/tailscale/authkey`; empty keeps the existing file.
+        type: str
+        default: ""
+        no_log: true
+      tailscale_up_extra_args:
+        description: Extra arguments for `tailscale up`.
+        type: str
+        default: ""

@@ -1,0 +1,5 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+# Debian architecture name for the target machine architecture
+_vscode_apt_arch: "{{ {'x86_64': 'amd64', 'aarch64': 'arm64', 'armv7l': 'armhf'}[ansible_facts['architecture']] }}"

@@ -2,4 +2,7 @@
 # SPDX-License-Identifier: MIT
 ---
 - name: Import reset connection handler
-  ansible.builtin.import_tasks: reset-connection.yml
+  ansible.builtin.import_tasks: reset_connection.yml
+
+- name: Import restart docker handler
+  ansible.builtin.import_tasks: restart_docker.yml

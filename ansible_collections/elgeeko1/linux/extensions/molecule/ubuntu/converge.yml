@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: Apply elgeeko1.linux.ubuntu
+      ansible.builtin.include_role:
+        name: elgeeko1.linux.ubuntu
+      vars:
+        ubuntu_trim_motd: true

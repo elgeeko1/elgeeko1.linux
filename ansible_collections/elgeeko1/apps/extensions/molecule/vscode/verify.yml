@@ -1,0 +1,47 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+
+    - name: Assert packages are installed
+      ansible.builtin.assert:
+        that:
+          - "'code' in ansible_facts.packages"
+
+    - name: Find APT sources that name https://packages.microsoft.com/repos/code
+      register: _verify_sources
+      changed_when: false
+      failed_when: _verify_sources.rc > 1
+      ansible.builtin.command:
+        cmd: grep -rlF --include=*.list --include=*.sources https://packages.microsoft.com/repos/code /etc/apt
+
+    - name: Assert only /etc/apt/sources.list.d/vscode.sources names the repository
+      ansible.builtin.assert:
+        that:
+          - _verify_sources.stdout_lines == ['/etc/apt/sources.list.d/vscode.sources']
+
+    - name: Update the APT cache
+      become: true
+      register: _verify_apt_update
+      changed_when: false
+      # the apt module returns no stderr from a cache update, which hides W: and E: lines
+      ansible.builtin.command:  # noqa: command-instead-of-module
+        cmd: apt-get update
+
+    - name: Assert apt-get update reports no warnings or errors
+      ansible.builtin.assert:
+        that:
+          - _verify_apt_update.stderr_lines | select('match', '^(W|E):') | list | length == 0
+
+    - name: List installed extensions
+      register: _verify_extensions
+      changed_when: false
+      ansible.builtin.command:
+        cmd: code --list-extensions
+
+    - name: Assert the extension is installed
+      ansible.builtin.assert:
+        that:
+          - "'redhat.vscode-yaml' in _verify_extensions.stdout_lines"

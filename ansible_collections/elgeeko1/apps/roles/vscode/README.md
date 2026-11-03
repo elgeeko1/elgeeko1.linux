@@ -1,18 +1,39 @@
-# elgeeko1.apps.vscode - install Visual Studio Code
+# elgeeko1.apps.vscode
+
+Installs Visual Studio Code from the Microsoft APT repository, with extensions.
 
 ## Features
 
-- installs Visual Studio Code
-- installs extensions
+- Adds the Microsoft APT repository as `/etc/apt/sources.list.d/vscode.sources`, the file the `code`
+  package maintains.
+- Installs `code`.
+- Installs extensions for the desktop editor and for VS Code Server.
 
-## Role Variables
+## Requirements
 
-### multiarchitecture builds
+- The [collection requirements](../../README.md#requirements).
 
-- `vscode_version`: version number of Visual Studio Code to install.
+## Role variables
 
-  Default: empty (latest)
+<!-- BEGIN_ANSIBLE_DOCS -->
 
-- `vscode_extensions`: list of extension identifiers to install.
+| Variable | Type | Default | Description |
+| -- | -- | -- | -- |
+| `vscode_version` | str | - | `code` package version; unset installs the candidate. |
+| `vscode_extensions` | list of str | `[]` | Extension identifiers to install. |
 
-  Default: `[]`
+<!-- END_ANSIBLE_DOCS -->
+
+## Example playbook
+
+```yaml
+- name: Configure workstations
+  hosts: workstations
+  roles:
+    - role: elgeeko1.apps.vscode
+```
+
+## License
+
+MIT. See [LICENSE](LICENSE). Portions are BSD-3-Clause; see
+[THIRD_PARTY_NOTICE.md](THIRD_PARTY_NOTICE.md).

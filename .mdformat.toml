@@ -1,0 +1,8 @@
+# mdformat configuration; output matches the markdownlint rules in .markdownlint.jsonc
+
+# MD013 line length
+wrap = 100
+
+# MD060 compact tables
+[plugin.tables]
+compact_tables = true

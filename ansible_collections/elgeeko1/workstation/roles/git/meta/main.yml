@@ -3,15 +3,14 @@
 ---
 galaxy_info:
   author: Jeff C. Jensen <11233838+elgeeko1@users.noreply.github.com>
-  description: "Configure a Linux workstation for use as a git client (including gpg keys)."
+  description: "Configure git for a user, with an optional GPG signing key."
   license: MIT
-  min_ansible_version: "2.16"
+  standalone: false
   platforms:
     - name: Ubuntu
-      versions: [jammy, noble]
+      versions: [jammy, noble, resolute]
     - name: Debian
-      versions: [bullseye, bookworm]
-  galaxy_tags: [linux, workstation, git]
+      versions: [bookworm, trixie]
 
 collections:
   - community.general

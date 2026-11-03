@@ -1,0 +1,14 @@
+---
+# reruns the maintainer scripts, as a package upgrade does
+- name: Side effect
+  hosts: all
+  tasks:
+    - name: Reinstall 1password
+      become: true
+      changed_when: true
+      # the noninteractive frontend answers debconf prompts with their defaults, as unattended upgrades do
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+      # the apt module has no reinstall option
+      ansible.builtin.command:  # noqa: command-instead-of-module
+        cmd: apt-get install --reinstall --yes 1password

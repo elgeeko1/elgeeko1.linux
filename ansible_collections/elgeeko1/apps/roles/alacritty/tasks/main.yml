@@ -1,14 +1,17 @@
 # SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
 # SPDX-License-Identifier: MIT
 ---
-- name: Install alacritty
+- name: Install alacritty (snap)
   become: true
-  ansible.builtin.package:
+  community.general.snap:
     name: alacritty
+    channel: stable
+    classic: true
+    state: present
 
 - name: Create ~/.config/alacritty
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.config/alacritty"
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/alacritty"
     state: directory
     mode: u=rwx,g=,o=
 
@@ -16,9 +19,37 @@
   when: alacritty_config_template | length > 0
   ansible.builtin.template:
     src: "{{ alacritty_config_template }}"
-    dest: "{{ ansible_env.HOME }}/.config/alacritty/"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.config/alacritty/"
     mode: u=rw,g=,o=
 
 - name: Configure tmux
   when: alacritty_tmux_enabled
   ansible.builtin.import_tasks: tmux.yml
+
+- name: Add "title()" shell function to ~/.bash_aliases
+  ansible.builtin.blockinfile:
+    path: "{{ ansible_facts['env']['HOME'] }}/.bash_aliases"
+    create: true
+    mode: u=rw,g=r,o=r
+    marker: "# {mark} ANSIBLE MANAGED: title() function"
+    block: |
+      title() {
+        local title_str="${*:-}"
+
+        # strip 'sudo' prefix if present
+        title_str="${title_str#sudo }"
+
+        if [[ -n "${TMUX:-}" ]]; then
+          # set tmux per-pane title (used by pane_title)
+          tmux select-pane -T "$title_str"
+        else
+          # outside tmux: set terminal title via OSC 0
+          printf '\033]0;%s\007' "$title_str"
+        fi
+      }
+
+- name: Reset pane title in .bashrc
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_facts['env']['HOME'] }}/.bashrc"
+    line: "command -v title >/dev/null 2>&1 && title || true"
+    create: false

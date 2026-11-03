@@ -1,0 +1,7 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+argument_specs:
+  main:
+    short_description: Install the Chromium browser as a deb package from the xtradeb/apps PPA
+    options: {}

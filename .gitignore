@@ -1,4 +1,26 @@
 .DS_Store
 .ansible/
-.vscode/
 
+# python caches
+__pycache__/
+*.py[cod]
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+.pyright/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+.hypothesis/
+
+# python virtual environments
+.venv/
+venv/
+
+# agents
+.agent-context/
+
+# personal Claude Code settings
+.claude/settings.local.json

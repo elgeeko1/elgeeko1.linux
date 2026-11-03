@@ -1,38 +1,45 @@
-# elgeeko1.linux.core - common Linux operations
+# elgeeko1.linux.core
 
-This role is a standard configuration for Debian / Ubuntu systems.
+Baseline configuration for Debian and Ubuntu hosts.
 
 ## Features
 
-- apt updates and package management
-- python3
-- timezone configuration
-- prerequisites for common Ansible modules
+- Creates `~/.cache` and `~/.ssh` with an include for `~/.ssh/config.d`.
+- Updates the APT cache, configures an Ubuntu archive snapshot, and upgrades packages.
+- Installs Python 3 and the packages that common Ansible modules require.
+- Sets the timezone and runs ntpsec.
+- Reboots when `/var/run/reboot-required` exists, except on local connections.
 
-## Role Variables
+## Requirements
 
-- `core_target_user`: The target use to use for user-scoped tasks.
+- The [collection requirements](../../README.md#requirements).
+- Collections: `community.general`
 
-  Default: the value of `ansible_user`, `ansible_ssh_user` or `ansible_env.USER` (whichever evaluates first).
+## Role variables
 
-- `core_timezone`: Timezone to set.
+<!-- BEGIN_ANSIBLE_DOCS -->
 
-  Default: empty (do not set).
+| Variable | Type | Default | Description |
+| -- | -- | -- | -- |
+| `core_target_user` | str | - | User that owns user-scoped files; defaults to `ansible_user`, then `ansible_ssh_user`, then `$USER` on the controller. |
+| `core_timezone` | str | - | IANA timezone name, such as `America/Los_Angeles`; unset leaves the timezone unchanged. |
+| `core_ntp_enabled` | bool | `true` | Install ntpsec and keep its service running. |
+| `core_apt_upgrade_state` | str | `once` | When to upgrade APT packages; `once` upgrades on the first run on each host. One of `no`, `always`, `once`. |
+| `core_python_version` | str | - | `python3-dev` version, such as `3.12`; unset installs the candidate. |
+| `core_apt_snapshot` | str | - | Ubuntu archive snapshot in `YYYYMMDDTHHMMSSZ` form, such as `20230302T030400Z`; unset leaves snapshots unconfigured. |
 
-- `core_ntp_enabled`: Install and start NTP service.
+<!-- END_ANSIBLE_DOCS -->
 
-  Default: `true`
+## Example playbook
 
-- `core_apt_upgrade_state`: Upgrade packages? Otherwise install packages only if not present.
+```yaml
+- name: Configure workstations
+  hosts: workstations
+  roles:
+    - role: elgeeko1.linux.core
+```
 
-  Default: `"once"` to upgrade once per host.
-  
-  Values: `"once", "always", "no"`.
+## License
 
-- `core_python_version`: Version of Python3 package to install.
-
-  Default: empty (latest).
-
-- `core_apt_snapshot`: Snapshot to use for ubuntu archives. Follows `YYYYMMDDTHHMMSSZ` format, for example `20230302T030400Z` for 03:04 UTC on 2 March 2023.
-
-  Default: empty (do not configure snapshots).
+MIT. See [LICENSE](LICENSE). Portions are BSD-3-Clause; see
+[THIRD_PARTY_NOTICE.md](THIRD_PARTY_NOTICE.md).

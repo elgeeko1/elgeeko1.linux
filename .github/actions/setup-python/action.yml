@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+name: Set up Python
+description: Set up Python, install the pip requirements, and install the Ansible collection dependencies
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v7
+      with:
+        python-version-file: .python-version
+        cache: pip
+        cache-dependency-path: requirements.txt
+
+    - name: Install Python requirements
+      shell: bash
+      run: python3 -m pip install -r requirements.txt
+
+    - name: Install collection dependencies
+      shell: bash
+      run: ansible-galaxy collection install -r collections/requirements.yml -p collections
