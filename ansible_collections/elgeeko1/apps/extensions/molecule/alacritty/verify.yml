@@ -37,3 +37,15 @@
       ansible.builtin.assert:
         that:
           - "'title() {' in (_verify_aliases.content | b64decode)"
+
+    - name: Read ~/.bashrc
+      register: _verify_bashrc
+      ansible.builtin.slurp:
+        src: "{{ ansible_facts['env']['HOME'] }}/.bashrc"
+
+    - name: Assert ~/.bashrc unsets the snap variables
+      ansible.builtin.assert:
+        that:
+          - >-
+            'if [ "${SNAP_NAME-}" = alacritty ]; then unset "${!SNAP_@}"; fi'
+            in (_verify_bashrc.content | b64decode).splitlines()

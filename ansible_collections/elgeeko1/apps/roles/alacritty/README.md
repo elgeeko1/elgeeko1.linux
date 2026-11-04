@@ -9,6 +9,8 @@ Installs the Alacritty terminal emulator from the Snap Store with an optional tm
 - Installs `tmux` and deploys `~/.tmux.conf`.
 - Adds a `title` shell function that sets the tmux pane title, or the terminal title outside tmux,
   and clears the title when a shell starts.
+- Adds a `~/.bashrc` line that unsets the `SNAP_*` variables exported by the Alacritty snap, so
+  programs started from its shells do not detect themselves as snaps.
 
 ## Requirements
 

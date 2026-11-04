@@ -52,6 +52,14 @@
         fi
       }
 
+# the classic snap exports SNAP_* to its child shells, so programs started from them detect themselves as snaps
+- name: Unset Alacritty snap variables in .bashrc
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_facts['env']['HOME'] }}/.bashrc"
+    regexp: '^if \[ "\$\{SNAP_NAME-\}" = alacritty \]'
+    line: 'if [ "${SNAP_NAME-}" = alacritty ]; then unset "${!SNAP_@}"; fi'
+    create: false
+
 - name: Reset pane title in .bashrc
   ansible.builtin.lineinfile:
     path: "{{ ansible_facts['env']['HOME'] }}/.bashrc"
