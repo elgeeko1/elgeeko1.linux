@@ -1,6 +1,11 @@
-# elgeeko1.linux Ansible collections
+# elgeeko1.linux
 
-Collections for configuring common server and workstation applications and roles.
+Ansible roles for general Debian and Ubuntu systems administration: a baseline configuration for
+servers and workstations, installs of common applications from their vendor APT repositories, and
+per-user workstation setup.
+
+The roles ship as three collections in the `elgeeko1` namespace, installed from this repository
+rather than from Ansible Galaxy:
 
 | Collection | Contents |
 | -- | -- |
@@ -8,7 +13,113 @@ Collections for configuring common server and workstation applications and roles
 | [`elgeeko1.apps`](ansible_collections/elgeeko1/apps/README.md) | Desktop and developer applications. |
 | [`elgeeko1.workstation`](ansible_collections/elgeeko1/workstation/README.md) | User workstation configuration. |
 
-Each collection README lists its requirements, installation, and roles.
+## Requirements
+
+- ansible-core 2.22 or later on the controller.
+- Ubuntu 26.04 or 24.04, or Debian 13 or 12, on the managed hosts. Ubuntu 22.04 support is
+  deprecated. A role README names any narrower platform support.
+- A remote user with sudo rights. The roles escalate privileges only for the tasks that need them.
+
+## Installation
+
+Install all three collections from a release tag on the
+[releases](https://github.com/elgeeko1/elgeeko1.linux/releases) page, replacing `vX.Y.Z`.
+`ansible-galaxy` also installs the Galaxy collections that they depend on:
+
+```bash
+ansible-galaxy collection install "git+https://github.com/elgeeko1/elgeeko1.linux.git#/ansible_collections/elgeeko1/,vX.Y.Z"
+```
+
+Or list them in the `requirements.yml` of your playbook repository:
+
+```yaml
+collections:
+  - name: https://github.com/elgeeko1/elgeeko1.linux.git#/ansible_collections/elgeeko1/
+    type: git
+    version: vX.Y.Z
+```
+
+```bash
+ansible-galaxy collection install -r requirements.yml
+```
+
+Each collection README shows how to install that collection alone.
+
+## Usage
+
+Reference a role by its fully qualified name. This inventory and playbook configure an Ubuntu
+workstation:
+
+```ini
+[workstations]
+desk01.example.com ansible_user=admin
+```
+
+```yaml
+---
+- name: Configure workstations
+  hosts: workstations
+  roles:
+    - elgeeko1.linux.core
+    - elgeeko1.linux.ubuntu
+    - elgeeko1.workstation.ssh_server
+    - role: elgeeko1.workstation.git
+      vars:
+        git_github_username: octocat
+        git_github_email: octocat@example.com
+    - elgeeko1.apps.docker
+```
+
+Run the playbook, entering the sudo password of the remote user:
+
+```bash
+ansible-playbook -i inventory.ini site.yml --ask-become-pass
+```
+
+Each role validates its variables against its `meta/argument_specs.yml` before it runs. The role
+README lists its features, requirements, and variables, and `ansible-doc` prints the variables of an
+installed role:
+
+```bash
+ansible-doc -t role elgeeko1.workstation.git
+```
+
+## Roles
+
+### elgeeko1.linux
+
+| Role | Description |
+| -- | -- |
+| [`core`](ansible_collections/elgeeko1/linux/roles/core/README.md) | Baseline configuration for Debian and Ubuntu hosts: upgrades packages, installs Python 3 for Ansible, sets the timezone and NTP, and reboots when required. |
+| [`ubuntu`](ansible_collections/elgeeko1/linux/roles/ubuntu/README.md) | Baseline configuration for Ubuntu hosts: disables automatic updates and Ubuntu Pro ads, removes error reporting, telemetry, and the Ubuntu Pro client, and trims the login message. |
+| [`ubuntu_desktop_ux`](ansible_collections/elgeeko1/linux/roles/ubuntu_desktop_ux/README.md) | Usability changes for Ubuntu Desktop: removes bundled apps, crash reports, and the update notifier, skips the network wait at boot, and shows an editable path in the Files toolbar. |
+
+### elgeeko1.apps
+
+| Role | Description |
+| -- | -- |
+| [`1password`](ansible_collections/elgeeko1/apps/roles/1password/README.md) | 1Password and the 1Password CLI from the 1Password APT repository. |
+| [`alacritty`](ansible_collections/elgeeko1/apps/roles/alacritty/README.md) | Alacritty terminal emulator, with an optional tmux configuration. |
+| [`chrome`](ansible_collections/elgeeko1/apps/roles/chrome/README.md) | Google Chrome stable from the Google APT repository. |
+| [`chromium`](ansible_collections/elgeeko1/apps/roles/chromium/README.md) | Chromium as a deb package from the xtradeb/apps PPA. |
+| [`docker`](ansible_collections/elgeeko1/apps/roles/docker/README.md) | Docker Engine from the Docker APT repository, with optional multi-architecture builds. |
+| [`firefox`](ansible_collections/elgeeko1/apps/roles/firefox/README.md) | Firefox as a deb package from the Mozilla Team PPA in place of the snap. |
+| [`kicad`](ansible_collections/elgeeko1/apps/roles/kicad/README.md) | KiCad 9 from the KiCad releases PPA. |
+| [`remmina`](ansible_collections/elgeeko1/apps/roles/remmina/README.md) | Remmina remote desktop client with the FreeRDP plugin. |
+| [`slack`](ansible_collections/elgeeko1/apps/roles/slack/README.md) | Slack from the Snap Store. |
+| [`spotify`](ansible_collections/elgeeko1/apps/roles/spotify/README.md) | Spotify client from the Spotify APT repository. |
+| [`tailscale`](ansible_collections/elgeeko1/apps/roles/tailscale/README.md) | Tailscale, bringing the node up with an auth key. |
+| [`vscode`](ansible_collections/elgeeko1/apps/roles/vscode/README.md) | Visual Studio Code from the Microsoft APT repository, with extensions. |
+| [`zoom`](ansible_collections/elgeeko1/apps/roles/zoom/README.md) | Zoom client from the Zoom deb package. |
+
+### elgeeko1.workstation
+
+| Role | Description |
+| -- | -- |
+| [`git`](ansible_collections/elgeeko1/workstation/roles/git/README.md) | Configures git for a user, with an optional GPG signing key. |
+| [`ssh_server`](ansible_collections/elgeeko1/workstation/roles/ssh_server/README.md) | Bootstraps SSH access for a user. |
+| [`terminal`](ansible_collections/elgeeko1/workstation/roles/terminal/README.md) | Configures shell conveniences for a user. |
+| [`vmware_guest`](ansible_collections/elgeeko1/workstation/roles/vmware_guest/README.md) | Configures a Linux guest running in a VMware virtual machine. |
 
 ## Development
 

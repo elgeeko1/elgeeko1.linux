@@ -8,7 +8,7 @@ Usability changes for Ubuntu Desktop.
 - Disables GNOME technical problem reports and clears `/var/crash`.
 - Removes the update notifier.
 - Masks `systemd-networkd-wait-online`.
-- Enables the Nautilus location entry.
+- Shows an editable path in the Files toolbar instead of the folder buttons.
 - Adds a `desktop` alias that starts the graphical target.
 - Reboots when a change requires it.
 

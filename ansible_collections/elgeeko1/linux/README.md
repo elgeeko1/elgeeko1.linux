@@ -28,10 +28,15 @@ collections:
 
 ## Roles
 
-- [`elgeeko1.linux.core`](roles/core/README.md): Baseline configuration for Debian and Ubuntu hosts.
-- [`elgeeko1.linux.ubuntu`](roles/ubuntu/README.md): Baseline configuration for Ubuntu hosts.
+- [`elgeeko1.linux.core`](roles/core/README.md): Baseline configuration for Debian and Ubuntu hosts:
+  upgrades packages, installs Python 3 for Ansible, sets the timezone and NTP, and reboots when
+  required.
+- [`elgeeko1.linux.ubuntu`](roles/ubuntu/README.md): Baseline configuration for Ubuntu hosts:
+  disables automatic updates and Ubuntu Pro ads, removes error reporting, telemetry, and the Ubuntu
+  Pro client, and trims the login message.
 - [`elgeeko1.linux.ubuntu_desktop_ux`](roles/ubuntu_desktop_ux/README.md): Usability changes for
-  Ubuntu Desktop.
+  Ubuntu Desktop: removes bundled apps, crash reports, and the update notifier, skips the network
+  wait at boot, and shows an editable path in the Files toolbar.
 
 ## Release notes
 
