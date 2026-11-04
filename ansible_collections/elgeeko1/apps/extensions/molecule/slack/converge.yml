@@ -1,6 +1,9 @@
 ---
+# one instance at a time: privileged instances share the AppArmor policy of the host, and
+# concurrent strict snap installs intermittently fail the capability check of snap-confine
 - name: Converge
   hosts: all
+  serial: 1
   tasks:
     - name: Apply elgeeko1.apps.slack
       ansible.builtin.include_role:
