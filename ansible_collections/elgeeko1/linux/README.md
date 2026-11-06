@@ -1,6 +1,7 @@
 # elgeeko1.linux
 
-Baseline configuration for Debian and Ubuntu hosts.
+Baseline configuration for Debian and Ubuntu hosts: Ansible prerequisites, APT upgrades, time sync,
+and Ubuntu debloating.
 
 ## Requirements
 
@@ -28,15 +29,15 @@ collections:
 
 ## Roles
 
-- [`elgeeko1.linux.core`](roles/core/README.md): Baseline configuration for Debian and Ubuntu hosts:
-  upgrades packages, installs Python 3 for Ansible, sets the timezone and NTP, and reboots when
-  required.
-- [`elgeeko1.linux.ubuntu`](roles/ubuntu/README.md): Baseline configuration for Ubuntu hosts:
-  disables automatic updates and Ubuntu Pro ads, removes error reporting, telemetry, and the Ubuntu
-  Pro client, and trims the login message.
-- [`elgeeko1.linux.ubuntu_desktop_ux`](roles/ubuntu_desktop_ux/README.md): Usability changes for
-  Ubuntu Desktop: removes bundled apps, crash reports, and the update notifier, skips the network
-  wait at boot, and shows an editable path in the Files toolbar.
+- [`elgeeko1.linux.ansible_prereqs`](roles/ansible_prereqs/README.md): Installs Python 3 and the
+  packages that Ansible modules require.
+- [`elgeeko1.linux.apt_upgrade`](roles/apt_upgrade/README.md): Upgrades APT packages, with an
+  optional Ubuntu archive snapshot, and reboots when required.
+- [`elgeeko1.linux.time`](roles/time/README.md): Sets the timezone and runs ntpsec.
+- [`elgeeko1.linux.ubuntu_debloat`](roles/ubuntu_debloat/README.md): Debloats Ubuntu: disables
+  automatic updates and removes error reporting and the Ubuntu Pro client.
+- [`elgeeko1.linux.ubuntu_debloat_desktop`](roles/ubuntu_debloat_desktop/README.md): Debloats Ubuntu
+  Desktop: removes bundled apps, GNOME problem reports, and the update notifier.
 
 ## Release notes
 

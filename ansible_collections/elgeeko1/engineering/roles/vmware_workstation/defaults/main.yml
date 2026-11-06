@@ -1,0 +1,6 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+vmware_workstation_bundle:
+vmware_workstation_cache_dir: "{{ ansible_facts['env']['HOME'] }}/.cache/elgeeko1.engineering/vmware_workstation"
+vmware_workstation_mok_password:

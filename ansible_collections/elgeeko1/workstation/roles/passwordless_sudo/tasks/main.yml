@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+- name: Append password-less sudoers with user '{{ passwordless_sudo_user }}'
+  become: true
+  community.general.sudoers:
+    name: "{{ passwordless_sudo_user }}"
+    user: "{{ passwordless_sudo_user }}"
+    commands: ALL
+    host: ALL
+    runas: ALL:ALL
+    nopassword: true

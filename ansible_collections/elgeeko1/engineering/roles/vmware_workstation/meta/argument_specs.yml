@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+argument_specs:
+  main:
+    short_description: Install VMware Workstation Pro on a Linux host
+    options:
+      vmware_workstation_bundle:
+        description: Controller path of the VMware Workstation Pro installer, under its Broadcom file name ending in `-<build>.x86_64.bundle`.
+        type: str
+        required: true
+      vmware_workstation_cache_dir:
+        description: Directory of the connecting user that keeps the copied installer; defaults to `~/.cache/elgeeko1.engineering/vmware_workstation`.
+        type: str
+      vmware_workstation_mok_password:
+        description: One-time MokManager password that enrolls the module signing certificate at the next boot; unset leaves enrollment to the user.
+        type: str
+        no_log: true

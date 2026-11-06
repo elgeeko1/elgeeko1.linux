@@ -1,13 +1,7 @@
 ---
-- name: Stat ~/.cache
-  register: _zoom_r_cache_dir
-  ansible.builtin.stat:
-    path: "{{ ansible_facts['env']['HOME'] }}/.cache"
-
-- name: Create ~/.cache
-  when: not _zoom_r_cache_dir.stat.exists
+- name: Create the download directory
   ansible.builtin.file:
-    path: "{{ ansible_facts['env']['HOME'] }}/.cache"
+    path: "{{ zoom_download_dir }}"
     state: directory
     mode: u=rwx,g=,o=
 
@@ -16,7 +10,7 @@
     url: "{{ _zoom_deb_url }}"
     dest: "{{ _zoom_deb_path }}"
     mode: u=rw,g=r,o=r
-    force: true
+    force: "{{ zoom_version == 'latest' }}"
 
 - name: Install Zoom
   become: true

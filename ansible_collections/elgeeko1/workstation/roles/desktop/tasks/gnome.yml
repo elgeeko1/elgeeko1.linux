@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+- name: Query gnome always use location entry setting
+  register: _desktop_r_location_entry
+  changed_when: false
+  ansible.builtin.command: |
+    gsettings get org.gnome.nautilus.preferences always-use-location-entry
+
+- name: Gnome enable always use location entry
+  when: _desktop_r_location_entry.stdout != "true"
+  changed_when: true
+  ansible.builtin.command: |
+    gsettings set org.gnome.nautilus.preferences always-use-location-entry true

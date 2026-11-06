@@ -1,7 +1,0 @@
-# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
-# SPDX-License-Identifier: MIT
----
-argument_specs:
-  main:
-    short_description: Usability changes for Ubuntu Desktop
-    options: {}

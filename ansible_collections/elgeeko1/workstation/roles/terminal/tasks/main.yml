@@ -1,15 +1,4 @@
 ---
-- name: Append password-less sudoers with user '{{ terminal_user }}'
-  when: terminal_sudo_nopassword
-  become: true
-  community.general.sudoers:
-    name: "{{ terminal_user }}"
-    user: "{{ terminal_user }}"
-    commands: ALL
-    host: ALL
-    runas: ALL:ALL
-    nopassword: true
-
 - name: Add 'update' alias to .bash_aliases
   ansible.builtin.lineinfile:
     path: "{{ ansible_facts['env']['HOME'] }}/.bash_aliases"

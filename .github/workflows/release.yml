@@ -21,7 +21,7 @@ defaults:
     shell: bash
 
 env:
-  COLLECTIONS: linux apps workstation
+  COLLECTIONS: linux apps engineering workstation
 
 jobs:
   setup:

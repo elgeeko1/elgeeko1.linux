@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+- name: Uninstall unused applications
+  ansible.builtin.import_tasks: unused_apps.yml
+
+- name: Disable problem reporting
+  ansible.builtin.import_tasks: problem_reporting.yml
+
+- name: Uninstall update notifications
+  ansible.builtin.import_tasks: update_notifier.yml
+
+- name: Perform scheduled reboot
+  ansible.builtin.import_tasks: reboot.yml

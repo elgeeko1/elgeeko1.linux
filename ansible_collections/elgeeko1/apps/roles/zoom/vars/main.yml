@@ -1,3 +1,3 @@
 ---
 _zoom_deb_url: "https://zoom.us/client/{{ zoom_version }}/zoom_amd64.deb"
-_zoom_deb_path: "{{ ansible_facts['env']['HOME'] }}/.cache/zoom_{{ zoom_version }}_amd64.deb"
+_zoom_deb_path: "{{ zoom_download_dir }}/zoom_{{ zoom_version }}_amd64.deb"

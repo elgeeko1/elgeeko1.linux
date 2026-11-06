@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+- name: Add 'desktop' alias to .bash_aliases
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_facts['env']['HOME'] }}/.bash_aliases"
+    regexp: "^alias desktop="
+    line: "alias desktop='sudo systemctl isolate graphical.target'"
+    create: true
+    mode: u=rw,g=r,o=r
+
+- name: Disable systemd-networkd-wait-online
+  ansible.builtin.import_tasks: systemd_networkd_wait_online.yml
+
+- name: Configure Gnome settings
+  ansible.builtin.import_tasks: gnome.yml

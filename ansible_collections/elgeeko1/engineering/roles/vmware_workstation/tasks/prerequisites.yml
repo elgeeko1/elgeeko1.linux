@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+- name: Apt update cache
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600 # 1 hr
+
+- name: Install the module build and signing tools
+  become: true
+  ansible.builtin.apt:
+    name:
+      - build-essential
+      - mokutil
+      - openssl
+    state: present
+
+# a container runs the kernel of its host, whose headers the container archive may not carry
+- name: Install the headers of the running kernel
+  tags: [molecule-notest]
+  become: true
+  ansible.builtin.apt:
+    name: linux-headers-{{ ansible_facts['kernel'] }}
+    state: present

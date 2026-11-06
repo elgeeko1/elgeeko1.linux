@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: Apply elgeeko1.engineering.vmware_workstation
+      ansible.builtin.include_role:
+        name: elgeeko1.engineering.vmware_workstation
+      vars:
+        vmware_workstation_bundle: "{{ playbook_dir }}/files/VMware-Workstation-Full-0.0.0-12345678.x86_64.bundle"

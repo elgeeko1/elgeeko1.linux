@@ -1,0 +1,12 @@
+---
+provisioner:
+  inventory:
+    group_vars:
+      all:
+        molecule_prepare_packages:
+          - gsettings-desktop-schemas
+          - nautilus-data
+          - libglib2.0-bin
+          - dbus-user-session
+          - dconf-gsettings-backend
+        molecule_prepare_user_session: true

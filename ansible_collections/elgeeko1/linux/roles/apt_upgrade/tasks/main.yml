@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: (c) 2021-2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+- name: Apt update cache
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600 # 1 hr
+    force_apt_get: true # aptitude may not be installed
+
+- name: Apt install apt dependencies
+  ansible.builtin.import_tasks: apt_deps.yml
+
+# must be installed before snapshots may be used
+- name: Package install ca-certificates
+  become: true
+  ansible.builtin.package:
+    name: ca-certificates
+    state: present
+
+- name: Configure snapshots for all repositories that support them
+  when: apt_upgrade_snapshot | default('', true) | length > 0
+  register: _apt_upgrade_r_snapshot
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/50snapshot
+    content: |
+      APT::Snapshot "{{ apt_upgrade_snapshot }}";
+    mode: u=rw,g=r,o=r
+
+- name: Apt update cache to apply snapshot change
+  become: true
+  ansible.builtin.apt:
+    update_cache: "{{ _apt_upgrade_r_snapshot.changed }}"
+
+- name: Apt upgrade
+  ansible.builtin.import_tasks: apt_upgrade.yml
+
+- name: Perform scheduled reboot
+  ansible.builtin.import_tasks: reboot.yml

@@ -1,0 +1,13 @@
+---
+provisioner:
+  inventory:
+    group_vars:
+      all:
+        molecule_prepare_packages:
+          - snapd
+          - apparmor
+          - gsettings-desktop-schemas
+          - libglib2.0-bin
+          - dbus-user-session
+          - dconf-gsettings-backend
+        molecule_prepare_user_session: true

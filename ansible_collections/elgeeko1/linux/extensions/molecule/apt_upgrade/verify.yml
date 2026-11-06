@@ -1,0 +1,22 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+
+    - name: Assert packages are installed
+      ansible.builtin.assert:
+        that:
+          - "'aptitude' in ansible_facts.packages"
+          - "'ca-certificates' in ansible_facts.packages"
+
+    - name: Stat the upgraded marker
+      register: _verify_upgraded
+      ansible.builtin.stat:
+        path: /var/cache/elgeeko1.linux.apt_upgrade.upgraded
+
+    - name: Assert the role recorded the upgrade
+      ansible.builtin.assert:
+        that:
+          - _verify_upgraded.stat.exists

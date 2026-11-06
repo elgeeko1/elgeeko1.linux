@@ -7,13 +7,7 @@
     name: gnupg
     state: present
 
-- name: Stat {{ _git_gpg_export_dir }}
-  register: _git_r_export_dir
-  ansible.builtin.stat:
-    path: "{{ _git_gpg_export_dir }}"
-
 - name: Create {{ _git_gpg_export_dir }}
-  when: not _git_r_export_dir.stat.exists
   ansible.builtin.file:
     path: "{{ _git_gpg_export_dir }}"
     state: directory

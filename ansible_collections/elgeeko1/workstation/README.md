@@ -1,6 +1,7 @@
 # elgeeko1.workstation
 
-User workstation configuration for Debian and Ubuntu hosts.
+Opinionated personal workstation preferences for Debian and Ubuntu hosts. Take each role or leave
+it.
 
 ## Requirements
 
@@ -28,13 +29,17 @@ collections:
 
 ## Roles
 
+- [`elgeeko1.workstation.desktop`](roles/desktop/README.md): Configures GNOME desktop preferences
+  for a user.
 - [`elgeeko1.workstation.git`](roles/git/README.md): Configures git for a user, with an optional GPG
   signing key.
+- [`elgeeko1.workstation.passwordless_sudo`](roles/passwordless_sudo/README.md): Grants a user
+  passwordless sudo.
+- [`elgeeko1.workstation.ssh_client`](roles/ssh_client/README.md): Configures the SSH client for a
+  user.
 - [`elgeeko1.workstation.ssh_server`](roles/ssh_server/README.md): Bootstraps SSH access for a user.
 - [`elgeeko1.workstation.terminal`](roles/terminal/README.md): Configures shell conveniences for a
   user.
-- [`elgeeko1.workstation.vmware_guest`](roles/vmware_guest/README.md): Configures a Linux guest
-  running in a VMware virtual machine.
 
 ## Release notes
 

@@ -1,0 +1,58 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+
+    - name: Assert packages are installed
+      ansible.builtin.assert:
+        that:
+          - "'build-essential' in ansible_facts.packages"
+          - "'mokutil' in ansible_facts.packages"
+
+    - name: Stat the cached installer bundle
+      register: _verify_bundle
+      ansible.builtin.stat:
+        path: "{{ ansible_facts['env']['HOME'] }}/.cache/elgeeko1.engineering/vmware_workstation/VMware-Workstation-Full-0.0.0-12345678.x86_64.bundle"
+
+    - name: Assert the bundle is in the cache directory
+      ansible.builtin.assert:
+        that:
+          - _verify_bundle.stat.exists
+
+    - name: Read the installer arguments
+      register: _verify_arguments
+      ansible.builtin.slurp:
+        src: /etc/vmware/installer-arguments
+
+    - name: Assert the installer ran unattended
+      ansible.builtin.assert:
+        that:
+          - (_verify_arguments.content | b64decode | trim) == '--console --required --eulas-agreed'
+
+    - name: Stat the module build script and the kernel header hook
+      register: _verify_scripts
+      loop:
+        - /usr/local/sbin/vmware-module-refresh
+        - /etc/kernel/header_postinst.d/vmware-modules
+      ansible.builtin.stat:
+        path: "{{ item }}"
+
+    - name: Assert the module build script and the kernel header hook are executable
+      loop: "{{ _verify_scripts.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+      ansible.builtin.assert:
+        that:
+          - item.stat.executable
+
+    - name: Stat the module signing key directory
+      register: _verify_mok_dir
+      ansible.builtin.stat:
+        path: /var/lib/vmware-mok
+
+    - name: Assert no signing key exists without Secure Boot
+      ansible.builtin.assert:
+        that:
+          - not _verify_mok_dir.stat.exists

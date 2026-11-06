@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+namespace: elgeeko1
+name: engineering
+version: 2.0.0
+readme: README.md
+authors:
+  - Jeff C. Jensen <11233838+elgeeko1@users.noreply.github.com>
+description: "Engineering tools for Debian and Ubuntu hosts: VS Code, KiCad, and VMware Workstation with Linux guests."
+license:
+  - MIT
+  - BSD-3-Clause
+tags: [linux, engineering, vmware, vmware_workstation, secure_boot, vscode, kicad, debian, ubuntu]
+dependencies: {}
+repository: https://github.com/elgeeko1/elgeeko1.linux
+homepage: https://github.com/elgeeko1/elgeeko1.linux
+documentation: https://github.com/elgeeko1/elgeeko1.linux/blob/main/ansible_collections/elgeeko1/engineering/README.md
+issues: https://github.com/elgeeko1/elgeeko1.linux/issues
+build_ignore:
+  - .ansible
+  - .git
+  - .github
+  - .pytest_cache
+  - .venv
+  - .vscode

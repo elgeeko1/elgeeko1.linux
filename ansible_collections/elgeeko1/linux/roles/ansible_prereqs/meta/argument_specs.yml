@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+argument_specs:
+  main:
+    short_description: Install the packages that Ansible modules require on Debian and Ubuntu hosts
+    options:
+      ansible_prereqs_python_version:
+        description: "`python3-dev` version, such as `3.12`; unset installs the candidate."
+        type: str

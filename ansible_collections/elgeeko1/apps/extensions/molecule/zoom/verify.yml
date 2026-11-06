@@ -19,3 +19,13 @@
       ansible.builtin.assert:
         that:
           - _verify_autostart.stat.exists
+
+    - name: Stat the cached Zoom deb
+      register: _verify_deb
+      ansible.builtin.stat:
+        path: "{{ ansible_facts['env']['HOME'] }}/.cache/elgeeko1.apps/zoom/zoom_latest_amd64.deb"
+
+    - name: Assert the Zoom deb is in the download directory
+      ansible.builtin.assert:
+        that:
+          - _verify_deb.stat.exists

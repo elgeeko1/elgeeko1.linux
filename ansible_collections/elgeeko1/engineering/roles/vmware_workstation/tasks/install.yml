@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+- name: Create the cache directory
+  ansible.builtin.file:
+    path: "{{ vmware_workstation_cache_dir }}"
+    state: directory
+    mode: u=rwx,g=,o=
+
+- name: Copy the installer bundle
+  ansible.builtin.copy:
+    src: "{{ vmware_workstation_bundle }}"
+    dest: "{{ _vmware_workstation_bundle_path }}"
+    mode: u=rw,g=,o=
+
+- name: Stat the installed product configuration
+  register: _vmware_workstation_r_config_stat
+  ansible.builtin.stat:
+    path: /etc/vmware/config
+
+- name: Read the installed product configuration
+  when: _vmware_workstation_r_config_stat.stat.exists
+  register: _vmware_workstation_r_config
+  ansible.builtin.slurp:
+    src: /etc/vmware/config
+
+- name: Run the installer bundle
+  when: _vmware_workstation_installed_build != _vmware_workstation_bundle_build
+  register: _vmware_workstation_r_install
+  become: true
+  changed_when: true
+  ansible.builtin.command:
+    argv:
+      - sh
+      - "{{ _vmware_workstation_bundle_path }}"
+      - --console
+      - --required
+      - --eulas-agreed

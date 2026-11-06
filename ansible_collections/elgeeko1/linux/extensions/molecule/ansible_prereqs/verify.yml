@@ -1,0 +1,16 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+
+    - name: Assert packages are installed
+      ansible.builtin.assert:
+        that:
+          - "'python3-dev' in ansible_facts.packages"
+          - "'python3-apt' in ansible_facts.packages"
+          - "'sudo' in ansible_facts.packages"
+          - "'acl' in ansible_facts.packages"
+          - "'unzip' in ansible_facts.packages"
+          - "'jq' in ansible_facts.packages"

@@ -1,0 +1,23 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+
+    - name: Assert packages are installed
+      ansible.builtin.assert:
+        that:
+          - "'tzdata' in ansible_facts.packages"
+          - "'ntpsec' in ansible_facts.packages"
+
+    - name: Read the system timezone
+      register: _verify_timezone
+      changed_when: false
+      ansible.builtin.command:
+        cmd: timedatectl show --property=Timezone --value
+
+    - name: Assert the timezone is set
+      ansible.builtin.assert:
+        that:
+          - _verify_timezone.stdout == 'America/Los_Angeles'

@@ -7,11 +7,11 @@ version: 2.0.0
 readme: README.md
 authors:
   - Jeff C. Jensen <11233838+elgeeko1@users.noreply.github.com>
-description: "Baseline configuration for Debian and Ubuntu hosts."
+description: "Baseline configuration for Debian and Ubuntu hosts: Ansible prerequisites, APT upgrades, time sync, and Ubuntu debloating."
 license:
   - MIT
   - BSD-3-Clause
-tags: [linux, common, baseline, debian, ubuntu]
+tags: [linux, baseline, debloat, ubuntu_debloat, apt, ntp, debian, ubuntu]
 dependencies:
   community.general: ">=14.0.0"
 repository: https://github.com/elgeeko1/elgeeko1.linux

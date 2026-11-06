@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+- name: Install the module build script
+  become: true
+  ansible.builtin.copy:
+    src: vmware-module-refresh.sh
+    dest: "{{ _vmware_workstation_refresh_script }}"
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+
+- name: Create the kernel header hook directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ _vmware_workstation_header_hook | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+
+- name: Install the kernel header hook that builds the modules for each new kernel
+  become: true
+  ansible.builtin.copy:
+    src: vmware-modules-header-postinst.sh
+    dest: "{{ _vmware_workstation_header_hook }}"
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+
+- name: Stat the modules of the running kernel
+  register: _vmware_workstation_r_vmnet
+  ansible.builtin.stat:
+    path: "{{ _vmware_workstation_modules_dir }}/vmnet.ko"
+
+# tagged molecule-notest because the test container lacks vmware-modconfig and the kernel headers.
+# Under Secure Boot the kernel loads the modules only once MokManager enrolls the signing
+# certificate, so the vmware service restarts only after enrollment.
+- name: Build the modules for the running kernel
+  when: _vmware_workstation_r_install is changed or not _vmware_workstation_r_vmnet.stat.exists
+  tags: [molecule-notest]
+  become: true
+  changed_when: true
+  ansible.builtin.command:
+    argv: >-
+      {{ [_vmware_workstation_refresh_script]
+      + (['--no-restart'] if _vmware_workstation_secure_boot and not _vmware_workstation_enrolled else []) }}

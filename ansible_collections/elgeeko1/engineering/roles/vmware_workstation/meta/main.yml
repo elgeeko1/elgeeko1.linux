@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+galaxy_info:
+  author: Jeff C. Jensen <11233838+elgeeko1@users.noreply.github.com>
+  description: "Install VMware Workstation Pro on a Linux host."
+  license: MIT
+  standalone: false
+  platforms:
+    - name: Ubuntu
+      versions: [noble, resolute]
+    - name: Debian
+      versions: [bookworm, trixie]

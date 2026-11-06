@@ -1,5 +1,0 @@
-# SPDX-FileCopyrightText: (c) 2025 Jeff C. Jensen
-# SPDX-License-Identifier: MIT
----
-terminal_user: "{{ ansible_user | default(ansible_ssh_user) | default(lookup('ansible.builtin.env', 'USER')) }}"
-terminal_sudo_nopassword: false

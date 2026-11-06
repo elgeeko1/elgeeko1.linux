@@ -13,3 +13,6 @@ argument_specs:
         description: Disable Zoom autostart on login.
         type: bool
         default: true
+      zoom_download_dir:
+        description: Directory of the connecting user that keeps the downloaded Zoom deb; defaults to `~/.cache/elgeeko1.apps/zoom`.
+        type: str

@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+- name: Assert the bundle file name carries a build number
+  ansible.builtin.assert:
+    that:
+      - _vmware_workstation_bundle_build is match('^[0-9]+$')
+    fail_msg: "bundle file name has no build number: {{ _vmware_workstation_bundle_name }}"
+    quiet: true
+
+- name: Install prerequisites
+  ansible.builtin.import_tasks: prerequisites.yml
+
+- name: Install VMware Workstation
+  ansible.builtin.import_tasks: install.yml
+
+- name: Configure module signing
+  ansible.builtin.import_tasks: secure_boot.yml
+
+- name: Build kernel modules
+  ansible.builtin.import_tasks: modules.yml

@@ -14,7 +14,7 @@ SCRIPT_NAME="$(basename "$0")"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "${SCRIPT_DIR}")"
 REPO_URL="https://github.com/elgeeko1/elgeeko1.linux"
-COLLECTIONS=(linux apps workstation)
+COLLECTIONS=(linux apps engineering workstation)
 readonly SCRIPT_NAME SCRIPT_DIR REPO_ROOT REPO_URL COLLECTIONS
 
 # ANSI SGR escapes; yellow is bold (1;33) because plain 33 renders as dim brown

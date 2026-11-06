@@ -7,11 +7,11 @@ version: 2.0.0
 readme: README.md
 authors:
   - Jeff C. Jensen <11233838+elgeeko1@users.noreply.github.com>
-description: "Desktop and developer applications for Debian and Ubuntu hosts."
+description: "Common desktop applications for Debian and Ubuntu hosts."
 license:
   - MIT
   - BSD-3-Clause
-tags: [linux, apps, debian, ubuntu]
+tags: [linux, apps, desktop, debian, ubuntu]
 dependencies:
   community.docker: ">=5.2.0"
   community.general: ">=14.0.0"

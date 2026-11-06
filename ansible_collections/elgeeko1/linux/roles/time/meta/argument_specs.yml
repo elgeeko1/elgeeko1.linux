@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+argument_specs:
+  main:
+    short_description: Set the timezone and run NTP on Debian and Ubuntu hosts
+    options:
+      time_timezone:
+        description: IANA timezone name, such as `America/Los_Angeles`; unset leaves the timezone unchanged.
+        type: str
+      time_ntp_enabled:
+        description: Install ntpsec and keep its service running.
+        type: bool
+        default: true

@@ -1,0 +1,37 @@
+---
+- name: Verify
+  hosts: all
+  environment:
+    XDG_RUNTIME_DIR: /run/user/{{ molecule_uid }}
+  tasks:
+    - name: Read ~/.bash_aliases
+      register: _verify_aliases
+      ansible.builtin.slurp:
+        src: "{{ ansible_facts['env']['HOME'] }}/.bash_aliases"
+
+    - name: Assert the desktop alias is present
+      ansible.builtin.assert:
+        that:
+          - "'alias desktop=' in (_verify_aliases.content | b64decode)"
+
+    - name: Stat the systemd-networkd-wait-online unit link
+      register: _verify_wait_online
+      ansible.builtin.stat:
+        path: /etc/systemd/system/systemd-networkd-wait-online.service
+
+    - name: Assert systemd-networkd-wait-online is masked
+      ansible.builtin.assert:
+        that:
+          - _verify_wait_online.stat.islnk
+          - _verify_wait_online.stat.lnk_source == '/dev/null'
+
+    - name: Read the Files location entry setting
+      register: _verify_location_entry
+      changed_when: false
+      ansible.builtin.command:
+        cmd: gsettings get org.gnome.nautilus.preferences always-use-location-entry
+
+    - name: Assert the Files location entry is enabled
+      ansible.builtin.assert:
+        that:
+          - _verify_location_entry.stdout == 'true'

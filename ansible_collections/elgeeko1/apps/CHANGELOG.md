@@ -7,6 +7,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- `zoom_download_dir` sets the directory that keeps the downloaded Zoom deb, by default
+  `~/.cache/elgeeko1.apps/zoom`.
+
+### Changed
+
+- **BREAKING:** `vscode` and `kicad` move to the `elgeeko1.engineering` collection.
+- `zoom` downloads a pinned `zoom_version` once and installs the cached deb on later runs.
+
 ### Fixed
 
 - `alacritty` and `slack` retry their snap install when the Snap Store rate-limits the request.

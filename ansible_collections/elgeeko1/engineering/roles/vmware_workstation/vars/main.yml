@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+_vmware_workstation_bundle_name: "{{ vmware_workstation_bundle | basename }}"
+_vmware_workstation_bundle_path: "{{ vmware_workstation_cache_dir }}/{{ _vmware_workstation_bundle_name }}"
+# the Broadcom bundle file name ends in -<build>.x86_64.bundle
+_vmware_workstation_bundle_build: "{{ _vmware_workstation_bundle_name | regex_findall('-([0-9]+)[.]x86_64[.]bundle$') | first | default('') }}"
+_vmware_workstation_installed_build: >-
+  {{ _vmware_workstation_r_config.content | default('') | b64decode
+  | regex_findall('product[.]buildNumber = .([0-9]+).') | first | default('') }}
+
+_vmware_workstation_secure_boot: "{{ 'SecureBoot enabled' in _vmware_workstation_r_sb_state.stdout }}"
+_vmware_workstation_enrolled: "{{ 'is already enrolled' in _vmware_workstation_r_test_key.stdout }}"
+# openssl prints "sha1 Fingerprint=AB:CD:..." and mokutil prints "SHA1 Fingerprint: ab:cd:..."
+_vmware_workstation_pending: >-
+  {{ (_vmware_workstation_r_fingerprint.stdout.split('=') | last | lower)
+  in (_vmware_workstation_r_list_new.stdout | lower) }}
+_vmware_workstation_mok_dir: /var/lib/vmware-mok
+_vmware_workstation_mok_key: "{{ _vmware_workstation_mok_dir }}/MOK.priv"
+_vmware_workstation_mok_cert: "{{ _vmware_workstation_mok_dir }}/MOK.der"
+_vmware_workstation_mok_hash: "{{ _vmware_workstation_mok_dir }}/enroll.hash"
+
+_vmware_workstation_refresh_script: /usr/local/sbin/vmware-module-refresh
+_vmware_workstation_header_hook: /etc/kernel/header_postinst.d/vmware-modules
+_vmware_workstation_modules_dir: "/lib/modules/{{ ansible_facts['kernel'] }}/misc"

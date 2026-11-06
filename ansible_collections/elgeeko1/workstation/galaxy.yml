@@ -7,10 +7,10 @@ version: 2.0.0
 readme: README.md
 authors:
   - Jeff C. Jensen <11233838+elgeeko1@users.noreply.github.com>
-description: "User workstation configuration for Debian and Ubuntu hosts."
+description: "Opinionated personal workstation preferences for Debian and Ubuntu hosts: git, SSH, shell, sudo, and GNOME."
 license:
   - MIT
-tags: [linux, workstation, debian, ubuntu]
+tags: [linux, workstation, dotfiles, debian, ubuntu]
 dependencies:
   ansible.posix: ">=2.2.0"
   community.crypto: ">=3.0.0"

@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+galaxy_info:
+  author: Jeff C. Jensen <11233838+elgeeko1@users.noreply.github.com>
+  description: "Configure the SSH client for a user."
+  license: MIT
+  standalone: false
+  platforms:
+    - name: Ubuntu
+      versions: [jammy, noble, resolute]
+    - name: Debian
+      versions: [bookworm, trixie]

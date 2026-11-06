@@ -1,0 +1,25 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Stat ~/.ssh/config.d
+      register: _verify_config_d
+      ansible.builtin.stat:
+        path: "{{ ansible_facts['env']['HOME'] }}/.ssh/config.d"
+
+    - name: Assert ~/.ssh/config.d is a private directory
+      ansible.builtin.assert:
+        that:
+          - _verify_config_d.stat.isdir
+          - _verify_config_d.stat.mode == '0700'
+
+    - name: Read ~/.ssh/config
+      register: _verify_ssh_config
+      ansible.builtin.slurp:
+        src: "{{ ansible_facts['env']['HOME'] }}/.ssh/config"
+
+    - name: Assert ~/.ssh/config includes config.d
+      ansible.builtin.assert:
+        that:
+          - "'Include config.d/*.config' in (_verify_ssh_config.content | b64decode)"
+          - "'Include config.d/**/*.config' in (_verify_ssh_config.content | b64decode)"

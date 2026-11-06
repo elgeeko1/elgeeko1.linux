@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: (c) 2021-2025 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+#
+# Modifications Copyright (c) 2024 Xronos Inc.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# This file contains portions from Jeff C. Jensen under MIT
+# and modifications by Xronos Inc. under BSD-3-Clause.
+---
+- name: Stat upgraded state
+  register: _apt_upgrade_r_upgraded
+  ansible.builtin.stat:
+    path: /var/cache/elgeeko1.linux.apt_upgrade.upgraded
+
+- name: Apt upgrade packages
+  when: apt_upgrade_state == 'always' or (apt_upgrade_state == 'once' and not _apt_upgrade_r_upgraded.stat.exists)
+  become: true
+  ansible.builtin.apt:
+    upgrade: safe
+
+- name: Apt autoremove
+  become: true
+  ansible.builtin.apt:
+    autoremove: true
+
+- name: Write upgraded state
+  when: apt_upgrade_state == 'always' or apt_upgrade_state == 'once'
+  become: true
+  ansible.builtin.copy:
+    content: ""
+    dest: /var/cache/elgeeko1.linux.apt_upgrade.upgraded
+    force: false
+    mode: u=rw,g=r,o=r

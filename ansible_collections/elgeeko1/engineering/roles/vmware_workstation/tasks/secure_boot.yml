@@ -1,0 +1,119 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+- name: Read the Secure Boot state
+  register: _vmware_workstation_r_sb_state
+  changed_when: false
+  check_mode: false
+  # a host without EFI variables, such as a container, has no Secure Boot
+  failed_when:
+    - _vmware_workstation_r_sb_state.rc != 0
+    - "'EFI variables are not supported' not in (_vmware_workstation_r_sb_state.stdout + _vmware_workstation_r_sb_state.stderr)"
+  ansible.builtin.command:
+    cmd: mokutil --sb-state
+
+- name: Configure the module signing key
+  when: _vmware_workstation_secure_boot
+  block:
+    - name: Create {{ _vmware_workstation_mok_dir }}
+      become: true
+      ansible.builtin.file:
+        path: "{{ _vmware_workstation_mok_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: u=rwx,g=,o=
+
+    - name: Generate the module signing key
+      become: true
+      ansible.builtin.command:
+        argv:
+          - openssl
+          - req
+          - -new
+          - -x509
+          - -newkey
+          - rsa:2048
+          - -nodes
+          - -days
+          - "3650"
+          - -subj
+          - /CN=VMware Module Signing/
+          - -keyout
+          - "{{ _vmware_workstation_mok_key }}"
+          - -outform
+          - DER
+          - -out
+          - "{{ _vmware_workstation_mok_cert }}"
+        creates: "{{ _vmware_workstation_mok_key }}"
+
+    - name: Restrict the module signing key
+      become: true
+      ansible.builtin.file:
+        path: "{{ _vmware_workstation_mok_key }}"
+        state: file
+        owner: root
+        group: root
+        mode: u=rw,g=,o=
+
+    # mokutil --test-key exits 0 whether or not the certificate is enrolled
+    - name: Read the enrollment state of the signing certificate
+      register: _vmware_workstation_r_test_key
+      become: true
+      changed_when: false
+      check_mode: false
+      ansible.builtin.command:
+        argv: [mokutil, --test-key, "{{ _vmware_workstation_mok_cert }}"]
+
+    - name: Read the fingerprint of the signing certificate
+      register: _vmware_workstation_r_fingerprint
+      become: true
+      changed_when: false
+      check_mode: false
+      ansible.builtin.command:
+        argv: [openssl, x509, -inform, DER, -in, "{{ _vmware_workstation_mok_cert }}", -noout, -fingerprint, -sha1]
+
+    - name: Read the pending enrollment requests
+      register: _vmware_workstation_r_list_new
+      become: true
+      changed_when: false
+      check_mode: false
+      ansible.builtin.command:
+        cmd: mokutil --list-new
+
+    - name: Queue the signing certificate for enrollment
+      when:
+        - vmware_workstation_mok_password | default('', true) | length > 0
+        - not _vmware_workstation_enrolled
+        - not _vmware_workstation_pending
+      block:
+        - name: Hash the enrollment password
+          register: _vmware_workstation_r_mok_hash
+          changed_when: false
+          check_mode: false
+          no_log: true
+          ansible.builtin.command:
+            argv: [mokutil, "--generate-hash={{ vmware_workstation_mok_password }}"]
+
+        - name: Write the enrollment password hash
+          become: true
+          no_log: true
+          ansible.builtin.copy:
+            content: "{{ _vmware_workstation_r_mok_hash.stdout }}\n"
+            dest: "{{ _vmware_workstation_mok_hash }}"
+            owner: root
+            group: root
+            mode: u=rw,g=,o=
+
+        - name: Queue the certificate in MokManager
+          become: true
+          changed_when: true
+          ansible.builtin.command:
+            argv: [mokutil, --import, "{{ _vmware_workstation_mok_cert }}", --hash-file, "{{ _vmware_workstation_mok_hash }}"]
+
+      always:
+        - name: Remove the enrollment password hash
+          become: true
+          ansible.builtin.file:
+            path: "{{ _vmware_workstation_mok_hash }}"
+            state: absent

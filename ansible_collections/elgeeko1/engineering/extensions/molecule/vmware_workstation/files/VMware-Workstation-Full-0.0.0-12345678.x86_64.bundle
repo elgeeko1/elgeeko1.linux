@@ -1,0 +1,11 @@
+#!/bin/sh
+# Test double for the VMware Workstation installer bundle, which only Broadcom distributes.
+#
+# Records its arguments and writes the product build number where the installer writes it.
+
+set -o errexit
+set -o nounset
+
+mkdir -p /etc/vmware
+printf '%s\n' "$*" >/etc/vmware/installer-arguments
+printf 'product.buildNumber = "12345678"\n' >/etc/vmware/config

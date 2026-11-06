@@ -1,0 +1,11 @@
+---
+- name: Converge
+  hosts: all
+  environment:
+    XDG_RUNTIME_DIR: /run/user/{{ molecule_uid }}
+  tasks:
+    - name: Apply elgeeko1.engineering.vmware_guest
+      ansible.builtin.include_role:
+        name: elgeeko1.engineering.vmware_guest
+      vars:
+        vmware_guest_desktop_enabled: true

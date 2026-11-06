@@ -1,6 +1,6 @@
 # elgeeko1.apps
 
-Desktop and developer applications for Debian and Ubuntu hosts.
+Common desktop applications for Debian and Ubuntu hosts.
 
 ## Requirements
 
@@ -40,7 +40,6 @@ collections:
   repository, with optional multi-architecture builds.
 - [`elgeeko1.apps.firefox`](roles/firefox/README.md): Installs Firefox as a deb package from the
   Mozilla Team PPA in place of the snap.
-- [`elgeeko1.apps.kicad`](roles/kicad/README.md): Installs KiCad 9 from the KiCad releases PPA.
 - [`elgeeko1.apps.remmina`](roles/remmina/README.md): Installs the Remmina remote desktop client
   with the FreeRDP plugin.
 - [`elgeeko1.apps.slack`](roles/slack/README.md): Installs Slack from the Snap Store.
@@ -48,8 +47,6 @@ collections:
   APT repository.
 - [`elgeeko1.apps.tailscale`](roles/tailscale/README.md): Installs Tailscale and brings the node up
   with an auth key.
-- [`elgeeko1.apps.vscode`](roles/vscode/README.md): Installs Visual Studio Code from the Microsoft
-  APT repository, with extensions.
 - [`elgeeko1.apps.zoom`](roles/zoom/README.md): Installs the Zoom client from the Zoom deb package.
 
 ## Release notes

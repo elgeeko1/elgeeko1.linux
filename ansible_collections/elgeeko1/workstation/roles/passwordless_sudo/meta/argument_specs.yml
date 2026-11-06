@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
+# SPDX-License-Identifier: MIT
+---
+argument_specs:
+  main:
+    short_description: Grant a user passwordless sudo
+    options:
+      passwordless_sudo_user:
+        description: User granted passwordless sudo; defaults to `ansible_user`, then `ansible_ssh_user`, then `$USER` on the controller.
+        type: str

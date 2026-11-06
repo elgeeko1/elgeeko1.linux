@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: (c) 2026 Jeff C. Jensen
 # SPDX-License-Identifier: MIT
 
-COLLECTIONS := linux apps workstation
+COLLECTIONS := linux apps engineering workstation
 
 .PHONY: help config docs lint test release
 
