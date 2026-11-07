@@ -29,9 +29,11 @@ args = ["new-session"]
 {% endif %}
 {% endif %}
 
+{% if osfam != 'Darwin' %}
 [selection]
 save_to_clipboard = true
 
+{% endif %}
 [window]
 dynamic_title = true
 dimensions = { columns = 120, lines = 40 }
