@@ -2,6 +2,10 @@
 - name: Converge
   hosts: all
   tasks:
+    - name: Apply elgeeko1.workstation.ssh_server without GitHub keys
+      ansible.builtin.include_role:
+        name: elgeeko1.workstation.ssh_server
+
     - name: Apply elgeeko1.workstation.ssh_server
       ansible.builtin.include_role:
         name: elgeeko1.workstation.ssh_server

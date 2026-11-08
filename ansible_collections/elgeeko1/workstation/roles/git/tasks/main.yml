@@ -14,4 +14,4 @@
 
 - name: Configure gpg
   when: git_generate_gpg
-  ansible.builtin.import_tasks: gpg.yml
+  ansible.builtin.include_tasks: gpg.yml

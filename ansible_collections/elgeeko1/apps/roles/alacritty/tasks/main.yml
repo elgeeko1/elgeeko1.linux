@@ -28,7 +28,7 @@
 
 - name: Configure tmux
   when: alacritty_tmux_enabled
-  ansible.builtin.import_tasks: tmux.yml
+  ansible.builtin.include_tasks: tmux.yml
 
 - name: Add "title()" shell function to ~/.bash_aliases
   ansible.builtin.blockinfile:

@@ -6,4 +6,4 @@
 
 - name: Import GitHub keys to SSH authorized keys
   when: ssh_server_github_username | default('', true) | length > 0
-  ansible.builtin.import_tasks: ssh_import_id_gh.yml
+  ansible.builtin.include_tasks: ssh_import_id_gh.yml

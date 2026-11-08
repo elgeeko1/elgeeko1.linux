@@ -20,4 +20,4 @@
 
 - name: Disable autostart
   when: zoom_disable_autostart
-  ansible.builtin.import_tasks: disable_autostart.yml
+  ansible.builtin.include_tasks: disable_autostart.yml

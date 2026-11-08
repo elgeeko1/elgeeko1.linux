@@ -53,4 +53,4 @@
 
 - name: Set Firefox as default Gnome browser
   when: firefox_set_default_browser
-  ansible.builtin.import_tasks: default_browser.yml
+  ansible.builtin.include_tasks: default_browser.yml

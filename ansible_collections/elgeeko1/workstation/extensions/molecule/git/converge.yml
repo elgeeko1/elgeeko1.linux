@@ -1,10 +1,16 @@
 ---
 - name: Converge
   hosts: all
+  vars:
+    git_github_username: octocat
+    git_github_email: octocat@example.com
   tasks:
-    - name: Apply elgeeko1.workstation.git
+    - name: Apply elgeeko1.workstation.git without GPG signing
       ansible.builtin.include_role:
         name: elgeeko1.workstation.git
       vars:
-        git_github_username: octocat
-        git_github_email: octocat@example.com
+        git_generate_gpg: false
+
+    - name: Apply elgeeko1.workstation.git
+      ansible.builtin.include_role:
+        name: elgeeko1.workstation.git

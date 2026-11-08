@@ -4,6 +4,7 @@
 - name: Fetch GitHub keys for user {{ ssh_server_github_username }}
   register:
     _ssh_server_github_keys: _task.result.content.splitlines() | reject('equalto', '') | list
+  check_mode: false
   ansible.builtin.uri:
     url: https://github.com/{{ ssh_server_github_username }}.keys
     return_content: true

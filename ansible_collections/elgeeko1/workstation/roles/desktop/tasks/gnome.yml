@@ -4,6 +4,7 @@
 - name: Query gnome always use location entry setting
   register: _desktop_r_location_entry
   changed_when: false
+  check_mode: false
   ansible.builtin.command: |
     gsettings get org.gnome.nautilus.preferences always-use-location-entry
 

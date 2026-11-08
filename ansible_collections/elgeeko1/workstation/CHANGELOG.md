@@ -21,6 +21,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `terminal_sudo_nopassword`; `passwordless_sudo` grants it to `passwordless_sudo_user`.
 - `git` writes its GPG key export to `~/.cache/elgeeko1.workstation/git`.
 
+### Fixed
+
+- `git` runs when `git_generate_gpg` is false and under `--check`, and reports a change when it
+  generates a GPG key.
+- `ssh_server` runs when `ssh_server_github_username` is unset, and under `--check`.
+
 ## [2.0.0] - 2026-11-03
 
 ### Added

@@ -21,6 +21,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - `alacritty` and `slack` retry their snap install when the Snap Store rate-limits the request.
 - `alacritty` configures tmux so Ctrl+PageUp and Ctrl+PageDown keep focus on the window they move.
+- `tailscale` runs under `--check` on a host that has joined its tailnet.
 
 ## [2.0.0] - 2026-11-03
 

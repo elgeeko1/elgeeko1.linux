@@ -30,6 +30,7 @@
 - name: Query current default browser (xdg-settings)
   register: _firefox_xdg_get
   changed_when: false
+  check_mode: false
   failed_when: false
   ansible.builtin.command: xdg-settings get default-web-browser
   environment:

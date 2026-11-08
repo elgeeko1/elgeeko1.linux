@@ -15,6 +15,7 @@
   ansible.builtin.command: tailscale status --json
   register: tailscale_verify_raw
   changed_when: false
+  check_mode: false
 
 - name: Assert Tailscale backend is Running
   ansible.builtin.assert:
