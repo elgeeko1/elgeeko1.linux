@@ -7,11 +7,31 @@
   vars:
     ansible_user: root
   tasks:
-    # Ubuntu 26.04 mounts a tmpfs on /tmp during boot, which hides module files
-    # staged there earlier; raw stages no files. A degraded system exits 1.
+    # A module that runs before boot completes can lose the files it stages under
+    # /tmp, and raw stages no files. systemctl fails until systemd accepts
+    # connections, and prints degraded with exit status 1 once a unit has failed.
     - name: Wait for systemd to finish booting
+      register: _prepare_boot_state
+      until: _prepare_boot_state.stdout | trim in ['running', 'degraded']
+      retries: 60
+      delay: 1
       changed_when: false
-      ansible.builtin.raw: systemctl is-system-running --wait || true
+      failed_when: _prepare_boot_state.stdout | trim not in ['running', 'degraded']
+      ansible.builtin.raw: systemctl is-system-running --wait
+
+    # the first line maps container UID 0 to its host UID; rootful Podman maps 0 to 0
+    - name: Read the UID map of the container
+      register: _prepare_uid_map
+      check_mode: false
+      ansible.builtin.slurp:
+        src: /proc/self/uid_map
+
+    - name: Assert container root is not host root
+      ansible.builtin.assert:
+        that:
+          - (_prepare_uid_map.content | b64decode).split()[1] != '0'
+        fail_msg: container root is host root
+        quiet: true
 
     - name: Create user molecule
       ansible.builtin.user:
@@ -39,25 +59,10 @@
       ansible.builtin.apt:
         update_cache: true
 
-    # snap hooks require AppArmor, which the container exposes through securityfs
-    - name: Mount securityfs
+    # a user namespace cannot mount squashfs, and snapd in a container mounts
+    # snaps through squashfuse when it is installed
+    - name: Install squashfuse for snapd
       when: "'snapd' in molecule_prepare_packages"
-      ansible.posix.mount:
-        path: /sys/kernel/security
-        src: securityfs
-        fstype: securityfs
-        state: ephemeral
-
-    - name: Gather distribution facts
-      ansible.builtin.setup:
-        gather_subset: [distribution]
-
-    # snapd in a Debian container fails to set up a loop device for each snap,
-    # and mounts snaps through squashfuse when it is installed
-    - name: Install squashfuse for snapd on Debian
-      when:
-        - "'snapd' in molecule_prepare_packages"
-        - ansible_facts['distribution'] == 'Debian'
       ansible.builtin.apt:
         name: [squashfuse, fuse3]
         state: present

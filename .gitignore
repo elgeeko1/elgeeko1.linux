@@ -19,6 +19,9 @@ htmlcov/
 .venv/
 venv/
 
+# Molecule state and logs of scripts/molecule-test.sh
+.molecule/
+
 # agents
 .agent-context/
 

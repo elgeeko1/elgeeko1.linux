@@ -12,7 +12,7 @@ help:
 	@echo "  make config                   # install the dev toolchain, collections, and git hooks"
 	@echo "  make docs                     # render the role README variable tables"
 	@echo "  make lint                     # run every pre-commit hook on every file"
-	@echo "  make test                     # run every Molecule scenario"
+	@echo "  make test [JOBS=N]            # run every Molecule scenario, N platforms at a time"
 	@echo "  make release VERSION=X.Y.Z    # set the collection versions and cut the changelog sections"
 
 .venv:
@@ -33,10 +33,7 @@ lint: | .venv
 	@uv run pre-commit run --all-files
 
 test: | .venv
-	@command -v docker >/dev/null 2>&1 || { echo "Error: 'docker' is not installed or not in PATH."; exit 1; }
-	@for c in $(COLLECTIONS); do \
-	  (cd ansible_collections/elgeeko1/$$c && uv run molecule test --all) || exit 1; \
-	done
+	@uv run scripts/molecule-test.sh $(if $(JOBS),--jobs $(JOBS)) $(COLLECTIONS)
 
 release:
 	@scripts/prepare-release.sh --version "$(VERSION)"

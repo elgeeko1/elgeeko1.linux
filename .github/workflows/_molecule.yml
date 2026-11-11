@@ -58,6 +58,15 @@ jobs:
       - name: Set up Python
         uses: ./.github/actions/setup-python
 
+      # rootless Podman creates the cgroup of each container through the systemd user
+      # manager, which runs for the runner user only while it lingers
+      - name: Start a systemd user manager
+        run: |
+          sudo loginctl enable-linger "$(id -un)"
+          runtime_dir="/run/user/$(id -u)"
+          timeout 60 bash -c "until [[ -S ${runtime_dir}/bus ]]; do sleep 1; done"
+          echo "XDG_RUNTIME_DIR=${runtime_dir}" >> "${GITHUB_ENV}"
+
       # each platform in .config/molecule/config.yml is named <scenario>-<platform>
       - name: Run molecule
         working-directory: ansible_collections/elgeeko1/${{ matrix.collection }}

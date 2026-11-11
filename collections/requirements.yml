@@ -10,3 +10,5 @@ collections:
     version: ">=5.2.0"
   - name: community.general
     version: ">=14.0.0"
+  - name: containers.podman
+    version: ">=1.21.0"

@@ -7,7 +7,7 @@ ansible-lint
 
 # role tests
 molecule
-molecule-plugins[docker]
+molecule-plugins[podman]
 
 # role README variable tables, generated from meta/argument_specs.yml
 aar-doc

@@ -6,28 +6,34 @@ dependency:
   name: galaxy
   enabled: false
 
+# Prerun installs the collection under test into ~/.ansible/collections with --force, so
+# concurrent runs of one collection overwrite one another; ANSIBLE_COLLECTIONS_PATH below
+# finds every collection in place
+prerun: false
+
+# Rootless Podman maps container root to an unprivileged host UID, so a container
+# cannot change global sysctls, binfmt_misc handlers, AppArmor policy, or the clock
+# of the host
 driver:
-  name: docker
+  name: podman
 
 platforms:
-  # privileged systemd container; each entry below overrides name and image
+  # systemd container; each entry below overrides name and image
   - &systemd
     name: ${MOLECULE_SCENARIO_NAME}-ubuntu2204
     image: docker.io/geerlingguy/docker-ubuntu2204-ansible:latest
-    platform: linux/amd64
-    # pulls the requested platform, which shares its tag with the other architectures
-    pull: true
     pre_build_image: true
+    # --pull=always pulls the requested platform on every create, which shares its tag with
+    # the other architectures; --image-volume=ignore drops the VOLUME on /sys/fs/cgroup of
+    # the image, which Podman mounts over the cgroup2 mount of systemd mode
+    extra_opts:
+      - --platform=linux/amd64
+      - --pull=always
+      - --image-volume=ignore
+    # capabilities apply only within the user namespace of the container
     privileged: true
-    cgroupns_mode: host
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:rw
-    # a privileged container shares binfmt_misc with the host, and stopping
-    # systemd-binfmt.service unregisters every host handler
-    command: >-
-      /usr/sbin/init
-      systemd.mask=systemd-binfmt.service
-      systemd.mask=proc-sys-fs-binfmt_misc.automount
+    systemd: always
+    command: /usr/sbin/init
   - <<: *systemd
     name: ${MOLECULE_SCENARIO_NAME}-ubuntu2404
     image: docker.io/geerlingguy/docker-ubuntu2404-ansible:latest

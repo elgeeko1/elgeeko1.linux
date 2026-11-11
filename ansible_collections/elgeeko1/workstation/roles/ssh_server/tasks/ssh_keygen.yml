@@ -36,12 +36,9 @@
     state: directory
     mode: u=rwx,g=,o=
 
-# one host at a time: the community.docker connection copies each key into this directory
-# as id_ed25519.pub before renaming it, so concurrent fetches overwrite one another
 - name: Controller pull public ssh key {{ ssh_server_user ~ '-' ~ inventory_hostname }}
   ansible.builtin.fetch:
     src: "{{ ansible_facts['env']['HOME'] }}/.ssh/id_ed25519.pub"
     dest: "{{ playbook_dir ~ '/keys/ssh' }}/{{ ssh_server_user }}-{{ inventory_hostname }}.pub"
     flat: true
     fail_on_missing: true
-  throttle: 1
