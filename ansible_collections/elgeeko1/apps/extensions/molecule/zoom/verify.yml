@@ -10,15 +10,24 @@
         that:
           - "'zoom' in ansible_facts.packages"
 
-    - name: Stat the Zoom autostart override
+    - name: Read the Zoom autostart entry
       register: _verify_autostart
-      ansible.builtin.stat:
-        path: "{{ ansible_facts['env']['HOME'] }}/.config/autostart/Zoom.desktop"
+      ansible.builtin.slurp:
+        src: "{{ ansible_facts['env']['HOME'] }}/.config/autostart/Zoom.desktop"
 
-    - name: Assert the Zoom autostart override exists
+    - name: Assert the Zoom autostart entry disables autostart and keeps its other keys
+      vars:
+        _verify_autostart_lines: "{{ (_verify_autostart.content | b64decode).splitlines() }}"
+        _verify_autostart_expected:
+          - Exec=/usr/bin/zoom
+          - Hidden=true
+          - X-GNOME-Autostart-enabled=false
       ansible.builtin.assert:
         that:
-          - _verify_autostart.stat.exists
+          - _verify_autostart_lines is superset(_verify_autostart_expected)
+          - "'Hidden=false' not in _verify_autostart_lines"
+        fail_msg: "Zoom.desktop: {{ _verify_autostart_lines | join(', ') }}"
+        quiet: true
 
     - name: Stat the cached Zoom deb
       register: _verify_deb

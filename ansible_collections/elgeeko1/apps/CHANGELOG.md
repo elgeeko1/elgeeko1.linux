@@ -24,6 +24,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `alacritty` retries its snap install when the Snap Store rate-limits the request.
 - `alacritty` configures tmux so Ctrl+PageUp and Ctrl+PageDown keep focus on the window they move.
 - `tailscale` runs under `--check` on a host that has joined its tailnet.
+- `zoom` disables autostart by setting `Hidden` and `X-GNOME-Autostart-enabled` in
+  `~/.config/autostart/Zoom.desktop` and keeps the other keys of that entry.
 
 ## [2.0.0] - 2026-11-03
 

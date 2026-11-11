@@ -5,21 +5,24 @@
     state: directory
     mode: u=rwx,g=rx,o=rx
 
-# drop a user-level override that hides/disables Zoom autostart even if
-# /etc/xdg/autostart/Zoom.desktop exists.
-- name: Create Zoom autostart user override
-  ansible.builtin.copy:
-    dest: "{{ ansible_facts['env']['HOME'] }}/.config/autostart/Zoom.desktop"
+# Hidden=true in a user autostart entry disables the system entry of the same file name, such as
+# /etc/xdg/autostart/Zoom.desktop
+- name: Disable Zoom autostart in the user autostart entry
+  loop:
+    - option: Hidden
+      value: "true"
+    - option: X-GNOME-Autostart-enabled
+      value: "false"
+  loop_control:
+    label: "{{ item.option }}"
+  community.general.ini_file:
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/autostart/Zoom.desktop"
+    section: Desktop Entry
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    no_extra_spaces: true
     mode: u=rw,g=r,o=r
-    content: |
-      [Desktop Entry]
-      Type=Application
-      Name=Zoom (disabled)
-      Exec=zoom --no-silent
-      # Prevent GNOME/KDE from autostarting Zoom
-      Hidden=true
-      NoDisplay=true
-      X-GNOME-Autostart-enabled=false
+    state: present
 
 - name: Ensure local applications dir exists
   ansible.builtin.file:

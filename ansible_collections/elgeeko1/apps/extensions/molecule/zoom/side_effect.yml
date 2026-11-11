@@ -1,0 +1,21 @@
+---
+# replaces the autostart entry that converge created with one that enables Zoom, then applies the
+# autostart tasks of the role over it
+- name: Side effect
+  hosts: all
+  tasks:
+    - name: Write a Zoom autostart entry that enables Zoom
+      ansible.builtin.copy:
+        dest: "{{ ansible_facts['env']['HOME'] }}/.config/autostart/Zoom.desktop"
+        content: |
+          [Desktop Entry]
+          Type=Application
+          Name=Zoom
+          Exec=/usr/bin/zoom
+          Hidden=false
+        mode: u=rw,g=r,o=r
+
+    - name: Apply the autostart tasks of elgeeko1.apps.zoom
+      ansible.builtin.include_role:
+        name: elgeeko1.apps.zoom
+        tasks_from: disable_autostart.yml
