@@ -110,7 +110,7 @@ ansible-doc -t role elgeeko1.workstation.git
 | [`docker`](ansible_collections/elgeeko1/apps/roles/docker/README.md) | Docker Engine from the Docker APT repository, with optional multi-architecture builds. |
 | [`firefox`](ansible_collections/elgeeko1/apps/roles/firefox/README.md) | Firefox as a deb package from the Mozilla Team PPA in place of the snap. |
 | [`remmina`](ansible_collections/elgeeko1/apps/roles/remmina/README.md) | Remmina remote desktop client with the FreeRDP plugin. |
-| [`slack`](ansible_collections/elgeeko1/apps/roles/slack/README.md) | Slack from the Snap Store. |
+| [`slack`](ansible_collections/elgeeko1/apps/roles/slack/README.md) | Slack from the Slack APT repository. |
 | [`spotify`](ansible_collections/elgeeko1/apps/roles/spotify/README.md) | Spotify client from the Spotify APT repository. |
 | [`tailscale`](ansible_collections/elgeeko1/apps/roles/tailscale/README.md) | Tailscale, bringing the node up with an auth key. |
 | [`zoom`](ansible_collections/elgeeko1/apps/roles/zoom/README.md) | Zoom client from the Zoom deb package. |

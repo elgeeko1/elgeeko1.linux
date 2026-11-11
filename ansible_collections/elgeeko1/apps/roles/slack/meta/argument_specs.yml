@@ -3,5 +3,5 @@
 ---
 argument_specs:
   main:
-    short_description: Install Slack from the Snap Store
+    short_description: Install Slack from the Slack APT repository
     options: {}

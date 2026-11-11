@@ -16,10 +16,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - **BREAKING:** `vscode` and `kicad` move to the `elgeeko1.engineering` collection.
 - `zoom` downloads a pinned `zoom_version` once and installs the cached deb on later runs.
+- `slack` installs `slack-desktop` from the Slack APT repository, with its signing key trusted for
+  that repository only, and removes the `slack` snap.
 
 ### Fixed
 
-- `alacritty` and `slack` retry their snap install when the Snap Store rate-limits the request.
+- `alacritty` retries its snap install when the Snap Store rate-limits the request.
 - `alacritty` configures tmux so Ctrl+PageUp and Ctrl+PageDown keep focus on the window they move.
 - `tailscale` runs under `--check` on a host that has joined its tailnet.
 

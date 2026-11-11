@@ -1,0 +1,44 @@
+---
+# recreates the APT source, keys, and /etc/default/slack that the cron job writes on a host
+# without /etc/default/slack, adds a local setting to that file, applies the role over them, then
+# reruns the maintainer scripts and the cron job, as a package upgrade and the next daily run do
+- name: Side effect
+  hosts: all
+  tasks:
+    - name: Remove /etc/default/slack
+      become: true
+      ansible.builtin.file:
+        path: /etc/default/slack
+        state: absent
+
+    - name: Run the slack daily cron job without /etc/default/slack
+      become: true
+      changed_when: true
+      ansible.builtin.command:
+        cmd: /etc/cron.daily/slack
+
+    - name: Add a local setting to /etc/default/slack
+      become: true
+      ansible.builtin.lineinfile:
+        path: /etc/default/slack
+        line: local_setting="kept"
+
+    - name: Apply the role over the APT source and keys of the cron job
+      ansible.builtin.include_role:
+        name: elgeeko1.apps.slack
+
+    - name: Reinstall slack-desktop
+      become: true
+      changed_when: true
+      # the noninteractive frontend answers debconf prompts with their defaults, as unattended upgrades do
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+      # the apt module has no reinstall option
+      ansible.builtin.command:  # noqa: command-instead-of-module
+        cmd: apt-get install --reinstall --yes slack-desktop
+
+    - name: Run the slack daily cron job
+      become: true
+      changed_when: true
+      ansible.builtin.command:
+        cmd: /etc/cron.daily/slack

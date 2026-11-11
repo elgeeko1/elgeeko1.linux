@@ -42,7 +42,7 @@ collections:
   Mozilla Team PPA in place of the snap.
 - [`elgeeko1.apps.remmina`](roles/remmina/README.md): Installs the Remmina remote desktop client
   with the FreeRDP plugin.
-- [`elgeeko1.apps.slack`](roles/slack/README.md): Installs Slack from the Snap Store.
+- [`elgeeko1.apps.slack`](roles/slack/README.md): Installs Slack from the Slack APT repository.
 - [`elgeeko1.apps.spotify`](roles/spotify/README.md): Installs the Spotify client from the Spotify
   APT repository.
 - [`elgeeko1.apps.tailscale`](roles/tailscale/README.md): Installs Tailscale and brings the node up

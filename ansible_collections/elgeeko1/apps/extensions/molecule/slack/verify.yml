@@ -2,8 +2,71 @@
 - name: Verify
   hosts: all
   tasks:
-    - name: List installed snaps
-      register: _verify_snaps
+    - name: Read the slack-desktop package status
+      register: _verify_slack_status
       changed_when: false
       ansible.builtin.command:
-        cmd: snap list slack
+        cmd: dpkg-query --show --showformat=${Status} slack-desktop
+
+    - name: Assert slack-desktop is installed
+      ansible.builtin.assert:
+        that:
+          - _verify_slack_status.stdout == 'install ok installed'
+        fail_msg: "slack-desktop status: {{ _verify_slack_status.stdout }}"
+        quiet: true
+
+    - name: Find APT sources that name https://packagecloud.io/slacktechnologies/slack
+      register: _verify_sources
+      changed_when: false
+      failed_when: _verify_sources.rc > 1
+      ansible.builtin.command:
+        cmd: grep -rlF --include=*.list --include=*.sources https://packagecloud.io/slacktechnologies/slack /etc/apt
+
+    - name: Assert only /etc/apt/sources.list.d/slack.sources names the repository
+      ansible.builtin.assert:
+        that:
+          - _verify_sources.stdout_lines == ['/etc/apt/sources.list.d/slack.sources']
+        fail_msg: "sources that name the repository: {{ _verify_sources.stdout_lines | join(', ') }}"
+        quiet: true
+
+    - name: Stat the keys that the Slack cron job can add
+      register: _verify_cron_keys
+      loop:
+        - /etc/apt/trusted.gpg.d/packagecloud.gpg
+        - /etc/apt/trusted.gpg.d/slack-desktop.gpg
+      ansible.builtin.stat:
+        path: "{{ item }}"
+
+    - name: Assert /etc/apt/trusted.gpg.d holds no key of the Slack cron job
+      ansible.builtin.assert:
+        that:
+          - _verify_cron_keys.results | selectattr('stat.exists') | list | length == 0
+        fail_msg: >-
+          keys of the Slack cron job:
+          {{ _verify_cron_keys.results | selectattr('stat.exists') | map(attribute='item') | join(', ') }}
+        quiet: true
+
+    - name: Read /etc/default/slack
+      register: _verify_slack_default
+      ansible.builtin.slurp:
+        src: /etc/default/slack
+
+    - name: Assert /etc/default/slack disables the cron job and keeps the local setting
+      vars:
+        _verify_slack_default_lines: "{{ (_verify_slack_default.content | b64decode).splitlines() }}"
+        _verify_slack_default_expected:
+          - repo_add_once="false"
+          - repo_reenable_on_distupgrade="false"
+          - local_setting="kept"
+      ansible.builtin.assert:
+        that:
+          - _verify_slack_default_lines is superset(_verify_slack_default_expected)
+        fail_msg: "/etc/default/slack: {{ _verify_slack_default_lines | join(', ') }}"
+        quiet: true
+
+    # apt fails on two sources for one URI with different Signed-By values
+    - name: Update the APT cache
+      become: true
+      changed_when: false
+      ansible.builtin.apt:
+        update_cache: true

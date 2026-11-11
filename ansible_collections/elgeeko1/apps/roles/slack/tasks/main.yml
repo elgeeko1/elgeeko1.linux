@@ -1,12 +1,68 @@
 ---
-# snap info reports a Snap Store rate-limit response (HTTP 429) as "no snap found"
-- name: Install Slack (snap)
+# Unless both settings are false, the daily cron job of slack-desktop writes slack.list for the
+# same URI without Signed-By, which apt rejects as a conflicting Signed-By, and installs its keys
+# into /etc/apt/trusted.gpg.d, where apt trusts them for every repository
+- name: Keep the Slack cron job from configuring APT
+  become: true
+  loop:
+    - repo_add_once
+    - repo_reenable_on_distupgrade
+  ansible.builtin.lineinfile:
+    path: /etc/default/slack
+    regexp: '^\s*{{ item }}='
+    line: '{{ item }}="false"'
+    create: true
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+
+# The cron job writes these while either setting is true; packagecloud.gpg holds the shared
+# packagecloud key, which expired in 2019
+- name: Remove the APT source and keys of the Slack cron job
+  become: true
+  loop:
+    - /etc/apt/sources.list.d/slack.list
+    - /etc/apt/trusted.gpg.d/packagecloud.gpg
+    - /etc/apt/trusted.gpg.d/slack-desktop.gpg
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+
+# The repository publishes only the jessie suite, and packagecloud serves its current signing
+# key at a fixed URL, which the module fetches every run into /etc/apt/keyrings
+- name: Configure the Slack APT repository
+  register: _slack_repo
+  become: true
+  ansible.builtin.deb822_repository:
+    install_python_debian: true
+    name: slack
+    types: [deb]
+    uris: https://packagecloud.io/slacktechnologies/slack/debian/
+    suites: [jessie]
+    components: [main]
+    architectures: [amd64]
+    signed_by: https://packagecloud.io/slacktechnologies/slack/gpgkey
+    state: present
+
+- name: Apt update cache
+  become: true
+  ansible.builtin.apt:
+    update_cache: "{{ _slack_repo.changed }}"
+
+- name: Install Slack
+  become: true
+  ansible.builtin.apt:
+    name: slack-desktop
+    state: present
+
+- name: Stat the snap command
+  register: _slack_snap_command
+  ansible.builtin.stat:
+    path: /usr/bin/snap
+
+- name: Remove the Slack snap
+  when: _slack_snap_command.stat.exists
   become: true
   community.general.snap:
     name: slack
-    channel: stable
-    classic: true
-    state: present
-  retries: 5
-  delay: 10
-  until: _task.result is succeeded
+    state: absent
