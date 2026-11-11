@@ -35,6 +35,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `apt_upgrade` records its first upgrade in `/var/cache/elgeeko1.linux.apt_upgrade.upgraded`, so a
   host that `core` upgraded upgrades once more under `apt_upgrade_state: once`.
 
+- `ubuntu_debloat_trim_motd` removes `/etc/update-motd.d/50-motd-news` and masks `motd-news.timer`.
+
 ### Removed
 
 - `core_target_user` is removed; no task read it.

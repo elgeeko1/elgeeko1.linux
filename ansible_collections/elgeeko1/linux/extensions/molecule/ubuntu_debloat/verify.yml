@@ -11,3 +11,44 @@
           - "'apport' not in ansible_facts.packages"
           - "'whoopsie' not in ansible_facts.packages"
           - "'ubuntu-pro-client' not in ansible_facts.packages"
+
+    - name: Stat /etc/update-motd.d/50-motd-news
+      register: _verify_motd_news
+      ansible.builtin.stat:
+        path: /etc/update-motd.d/50-motd-news
+
+    - name: Assert /etc/update-motd.d/50-motd-news is removed
+      ansible.builtin.assert:
+        that:
+          - not _verify_motd_news.stat.exists
+        quiet: true
+
+    - name: Stat /etc/default/motd-news
+      register: _verify_motd_news_default
+      ansible.builtin.stat:
+        path: /etc/default/motd-news
+
+    - name: Read /etc/default/motd-news
+      when: _verify_motd_news_default.stat.exists
+      register: _verify_motd_news_default_content
+      ansible.builtin.slurp:
+        src: /etc/default/motd-news
+
+    - name: Assert /etc/default/motd-news sets ENABLED=0
+      when: _verify_motd_news_default.stat.exists
+      ansible.builtin.assert:
+        that:
+          - "'ENABLED=0' in (_verify_motd_news_default_content.content | b64decode).splitlines()"
+        quiet: true
+
+    - name: Stat the motd-news.timer unit in /etc/systemd/system
+      register: _verify_motd_news_timer
+      ansible.builtin.stat:
+        path: /etc/systemd/system/motd-news.timer
+
+    - name: Assert motd-news.timer is masked
+      when: ansible_facts['distribution'] == 'Ubuntu'
+      ansible.builtin.assert:
+        that:
+          - _verify_motd_news_timer.stat.lnk_target | default('') == '/dev/null'
+        quiet: true

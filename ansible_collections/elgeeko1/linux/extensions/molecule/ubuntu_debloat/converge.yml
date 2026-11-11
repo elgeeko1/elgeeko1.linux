@@ -2,6 +2,16 @@
 - name: Converge
   hosts: all
   tasks:
+    # the container images lack the package that ships /etc/default/motd-news
+    - name: Install motd-news-config
+      when: ansible_facts['distribution'] == 'Ubuntu'
+      become: true
+      ansible.builtin.apt:
+        name: motd-news-config
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
     - name: Apply elgeeko1.linux.ubuntu_debloat
       ansible.builtin.include_role:
         name: elgeeko1.linux.ubuntu_debloat

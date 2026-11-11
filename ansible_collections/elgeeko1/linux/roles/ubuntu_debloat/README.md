@@ -9,7 +9,8 @@ Desktop.
 - Disables unattended upgrades, the Ubuntu Pro ESM apt hook, and Ubuntu Pro apt news.
 - Removes apport, whoopsie, and ubuntu-report.
 - Removes the Ubuntu Pro client.
-- Trims the login message of the day when `ubuntu_debloat_trim_motd` is true.
+- Trims the login message of the day and masks `motd-news.timer` when `ubuntu_debloat_trim_motd` is
+  true.
 - Reboots when a change requires it.
 
 ## Requirements

@@ -13,13 +13,36 @@
     path: /etc/update-motd.d/10-help-text
     state: absent
 
-- name: Set news message of the day to empty
+# motd-news.service runs 50-motd-news and fails once the script is removed; base-files ships the
+# timer on Ubuntu only
+- name: Mask motd-news.timer
+  when: ansible_facts['distribution'] == 'Ubuntu'
   become: true
-  ansible.builtin.copy:
-    content: "#!/bin/sh"
-    dest: /etc/update-motd.d/50-motd-news
-    force: true
-    mode: "0755"
+  ansible.builtin.systemd:
+    name: motd-news.timer
+    state: stopped
+    enabled: false
+    masked: true
+
+- name: Remove news message of the day
+  become: true
+  ansible.builtin.file:
+    path: /etc/update-motd.d/50-motd-news
+    state: absent
+
+- name: Stat /etc/default/motd-news
+  register: _ubuntu_debloat_r_motd
+  ansible.builtin.stat:
+    path: /etc/default/motd-news
+
+# a 50-motd-news restored by a reinstall of base-files prints nothing under ENABLED=0
+- name: Disable dynamic motd-news
+  when: _ubuntu_debloat_r_motd.stat.exists
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/default/motd-news
+    regexp: "^ENABLED=1"
+    line: "ENABLED=0"
 
 - name: Remove contract-us-esm message of the day
   become: true
@@ -44,16 +67,3 @@
   ansible.builtin.file:
     path: /etc/update-motd.d/95-hwe-eol
     state: absent
-
-- name: Stat /etc/default/motd-news
-  register: _ubuntu_debloat_r_motd
-  ansible.builtin.stat:
-    path: /etc/default/motd-news
-
-- name: Disable dynamic motd-news
-  when: _ubuntu_debloat_r_motd.stat.exists
-  become: true
-  ansible.builtin.lineinfile:
-    path: /etc/default/motd-news
-    regexp: "^ENABLED=1"
-    line: "ENABLED=0"
