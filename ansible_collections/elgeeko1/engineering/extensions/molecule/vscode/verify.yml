@@ -22,6 +22,25 @@
         that:
           - _verify_sources.stdout_lines == ['/etc/apt/sources.list.d/vscode.sources']
 
+    # the role leaves /usr/share/keyrings/microsoft.gpg in place, so its absence shows that the code
+    # postinst wrote no key
+    - name: Stat the keys that code packages write
+      register: _verify_code_keys
+      loop:
+        - /etc/apt/trusted.gpg.d/microsoft.gpg
+        - /usr/share/keyrings/microsoft.gpg
+      ansible.builtin.stat:
+        path: "{{ item }}"
+
+    - name: Assert no key of a code package exists
+      ansible.builtin.assert:
+        that:
+          - _verify_code_keys.results | selectattr('stat.exists') | list | length == 0
+        fail_msg: >-
+          keys of code packages:
+          {{ _verify_code_keys.results | selectattr('stat.exists') | map(attribute='item') | join(', ') }}
+        quiet: true
+
     - name: Update the APT cache
       become: true
       register: _verify_apt_update

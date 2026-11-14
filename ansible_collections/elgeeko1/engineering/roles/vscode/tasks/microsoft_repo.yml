@@ -7,17 +7,30 @@
 # This file contains portions from Jeff C. Jensen under MIT
 # and modifications by Xronos Inc. under BSD-3-Clause.
 ---
-- name: Debconf add code/add-microsoft-repo
+# while this answer is true, the code postinst writes /usr/share/keyrings/microsoft.gpg when it is
+# missing, and vscode.sources when no source file names the repository
+- name: Keep the code package from configuring APT
   become: true
   ansible.builtin.debconf:
     name: code
-    question: add-microsoft-repo
-    value: "true"
-    vtype: "boolean"
+    question: code/add-microsoft-repo
+    value: "false"
+    vtype: boolean
 
-# the code postinst keeps any .list or .sources file that already names the
-# repository, and Microsoft publishes its current signing key at a fixed URL,
-# which the module fetches every run into /etc/apt/keyrings
+# code 1.100 and earlier write vscode.list without Signed-By, which apt rejects beside vscode.sources
+# as a conflicting Signed-By, and microsoft.gpg into /etc/apt/trusted.gpg.d, where apt trusts it for
+# every repository
+- name: Remove the APT source and key of earlier code packages
+  become: true
+  loop:
+    - /etc/apt/sources.list.d/vscode.list
+    - /etc/apt/trusted.gpg.d/microsoft.gpg
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+
+# Microsoft publishes its current signing key at a fixed URL, which the module fetches every run into
+# /etc/apt/keyrings
 - name: Configure Microsoft APT repository
   register: _vscode_r_repo
   become: true

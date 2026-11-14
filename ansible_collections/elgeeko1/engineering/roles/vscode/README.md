@@ -4,9 +4,11 @@ Installs Visual Studio Code from the Microsoft APT repository, with extensions.
 
 ## Features
 
-- Adds the Microsoft APT repository as `/etc/apt/sources.list.d/vscode.sources`, the file the `code`
-  package maintains.
-- Installs `code`.
+- Adds the Microsoft APT repository as `vscode.sources`, with its signing key in
+  `/etc/apt/keyrings`, and installs `code`.
+- Answers the `code/add-microsoft-repo` debconf question with `false`, so that the `code` package
+  adds no APT source or key. It removes the `vscode.list` source and the
+  `/etc/apt/trusted.gpg.d/microsoft.gpg` key that `code` 1.100 and earlier add.
 - Installs extensions for the desktop editor and for VS Code Server.
 
 ## Requirements

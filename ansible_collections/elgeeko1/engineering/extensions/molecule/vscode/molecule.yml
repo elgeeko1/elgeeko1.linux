@@ -1,4 +1,11 @@
 ---
+provisioner:
+  inventory:
+    group_vars:
+      all:
+        # side_effect.yml dearmors the Microsoft signing key into /etc/apt/trusted.gpg.d
+        molecule_prepare_packages:
+          - gpg
 ansible:
   playbooks:
     side_effect: side_effect.yml

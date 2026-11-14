@@ -4,8 +4,9 @@ Installs Google Chrome stable from the Google APT repository.
 
 ## Features
 
-- Adds the Google APT repository as `/etc/apt/sources.list.d/google-chrome.sources`, the file the
-  `google-chrome-stable` package maintains.
+- Adds the Google APT repository as `/etc/apt/sources.list.d/google-chrome.sources`, with its
+  signing key in `/usr/share/keyrings/google-chrome.gpg`, and writes each file only when it is
+  missing, since the `google-chrome-stable` package maintains both.
 - Installs `google-chrome-stable`.
 
 ## Requirements

@@ -1,8 +1,45 @@
 ---
-# reruns the maintainer scripts, as a package upgrade does
+# recreates the APT source, key, and debconf answer of a host that code 1.100 or earlier configured,
+# applies the role over them, then reruns the maintainer scripts, as a package upgrade does
 - name: Side effect
   hosts: all
   tasks:
+    - name: Remove the APT source of the role
+      become: true
+      ansible.builtin.file:
+        path: /etc/apt/sources.list.d/vscode.sources
+        state: absent
+
+    - name: Write the APT source of code 1.100
+      become: true
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/vscode.list
+        content: |
+          ### THIS FILE IS AUTOMATICALLY CONFIGURED ###
+          # You may comment out this entry, but any other modifications may be lost.
+          deb [arch=amd64,arm64,armhf] https://packages.microsoft.com/repos/code stable main
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Write the key of code 1.100 into /etc/apt/trusted.gpg.d
+      become: true
+      ansible.builtin.command:
+        cmd: gpg --dearmor --output /etc/apt/trusted.gpg.d/microsoft.gpg /etc/apt/keyrings/vscode.asc
+        creates: /etc/apt/trusted.gpg.d/microsoft.gpg
+
+    - name: Answer code/add-microsoft-repo with its default
+      become: true
+      ansible.builtin.debconf:
+        name: code
+        question: code/add-microsoft-repo
+        value: "true"
+        vtype: boolean
+
+    - name: Apply the role over the APT source and key of code 1.100
+      ansible.builtin.include_role:
+        name: elgeeko1.engineering.vscode
+
     - name: Reinstall code
       become: true
       changed_when: true
