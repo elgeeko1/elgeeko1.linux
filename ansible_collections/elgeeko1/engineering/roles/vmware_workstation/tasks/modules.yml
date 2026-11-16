@@ -33,7 +33,7 @@
   ansible.builtin.stat:
     path: "{{ _vmware_workstation_modules_dir }}/vmnet.ko"
 
-# tagged molecule-notest because the test container lacks vmware-modconfig and the kernel headers.
+# tagged molecule-notest because the test container lacks VMware module sources and kernel headers.
 # Under Secure Boot the kernel loads the modules only once MokManager enrolls the signing
 # certificate, so the vmware service restarts only after enrollment.
 - name: Build the modules for the running kernel

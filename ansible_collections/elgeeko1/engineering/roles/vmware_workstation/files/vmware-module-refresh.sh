@@ -5,6 +5,9 @@
 # then restarts the vmware service, which loads the modules, unless --no-restart is given, and
 # refuses to restart while a virtual machine is running. Under Secure Boot it signs with the MOK in
 # /var/lib/vmware-mok, whose certificate must be enrolled before the kernel loads the modules.
+#
+# vmware-modconfig --build-mod builds only for the running kernel, so the script runs the Makefiles
+# of the module sources in /usr/lib/vmware/modules/source directly.
 
 set -o errexit
 set -o nounset
@@ -12,14 +15,17 @@ set -o pipefail
 
 SCRIPT_NAME="$(basename "$0")"
 RUNNING_RELEASE="$(uname -r)"
+SOURCE_DIR="/usr/lib/vmware/modules/source"
 MOK_DIR="/var/lib/vmware-mok"
 KEY_PATH="${MOK_DIR}/MOK.priv"
 CERT_PATH="${MOK_DIR}/MOK.der"
 MODULES=(vmmon vmnet)
-readonly SCRIPT_NAME RUNNING_RELEASE MOK_DIR KEY_PATH CERT_PATH MODULES
+readonly SCRIPT_NAME RUNNING_RELEASE SOURCE_DIR MOK_DIR KEY_PATH CERT_PATH MODULES
 
 kernel_release="${RUNNING_RELEASE}"
 restart="true"
+# global rather than local to main, since the EXIT trap runs after main returns
+build_dir=""
 
 if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
   C_RESET='\033[0m'
@@ -87,8 +93,16 @@ ensure_root_user() {
   [[ "${EUID}" -eq 0 ]] || die "not running as root"
 }
 
-ensure_vmware_modconfig_available() {
-  command -v vmware-modconfig >/dev/null 2>&1 || die "vmware-modconfig not found on PATH"
+ensure_module_sources_present() {
+  local module
+  for module in "${MODULES[@]}"; do
+    [[ -f "${SOURCE_DIR}/${module}.tar" ]] ||
+      die "module source not found: ${SOURCE_DIR}/${module}.tar"
+  done
+}
+
+ensure_make_available() {
+  command -v make >/dev/null 2>&1 || die "make not found on PATH"
 }
 
 ensure_gcc_available() {
@@ -130,10 +144,12 @@ resolve_secure_boot() {
 build_module() {
   local module="$1"
   local gcc_path="$2"
+  local module_dir="${build_dir}/${module}-only"
 
-  # destination directory is relative to /lib/modules/<release>, and .ko is appended to the name
-  vmware-modconfig --console --build-mod "${module}" "${gcc_path}" \
-    "/lib/modules/${kernel_release}/build/include" misc "${module}"
+  tar -xf "${SOURCE_DIR}/${module}.tar" -C "${build_dir}"
+  make --silent -C "${module_dir}" VM_UNAME="${kernel_release}" CC="${gcc_path}"
+  install -D -m 0644 "${module_dir}/${module}.ko" \
+    "/lib/modules/${kernel_release}/misc/${module}.ko"
 }
 
 sign_module() {
@@ -147,7 +163,8 @@ main() {
   parse_args "$@"
 
   ensure_root_user
-  ensure_vmware_modconfig_available
+  ensure_module_sources_present
+  ensure_make_available
   ensure_gcc_available
   ensure_mokutil_available
   ensure_kernel_headers_present
@@ -171,6 +188,10 @@ main() {
   log_info "Secure Boot:  ${secure_boot}"
   log_info "Restart:      ${restart}"
   log_info "GCC:          ${gcc_path}"
+
+  build_dir="$(mktemp -d)"
+  trap 'rm -rf -- "${build_dir}"' EXIT
+  readonly build_dir
 
   local module
   for module in "${MODULES[@]}"; do
