@@ -15,6 +15,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - **BREAKING:** `vscode` and `kicad` move to the `elgeeko1.engineering` collection.
+- The collection requires ansible-core 2.21 or later, so a controller with Python 3.12 can run it.
 - `zoom` downloads a pinned `zoom_version` once and installs the cached deb on later runs.
 - `slack` installs `slack-desktop` from the Slack APT repository, with its signing key trusted for
   that repository only, and removes the `slack` snap.

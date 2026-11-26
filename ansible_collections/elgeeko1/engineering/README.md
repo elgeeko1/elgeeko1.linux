@@ -5,7 +5,7 @@ guests.
 
 ## Requirements
 
-- ansible-core 2.22 or later.
+- ansible-core 2.21 or later.
 - Ubuntu 26.04 or 24.04, or Debian 13 or 12, on the managed hosts. Ubuntu 22.04 support is
   deprecated. A role README names any narrower platform support.
 

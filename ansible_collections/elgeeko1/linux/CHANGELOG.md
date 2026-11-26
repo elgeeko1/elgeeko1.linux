@@ -36,6 +36,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   | `ubuntu_disable_error_reporting` | `ubuntu_debloat_disable_error_reporting` |
   | `ubuntu_disable_pro` | `ubuntu_debloat_disable_pro` |
 
+- The collection requires ansible-core 2.21 or later, so a controller with Python 3.12 can run it.
+
 - `apt_upgrade` records its first upgrade in `/var/cache/elgeeko1.linux.apt_upgrade.upgraded`, so a
   host that `core` upgraded upgrades once more under `apt_upgrade_state: once`.
 

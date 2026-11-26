@@ -19,6 +19,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **BREAKING:** `vmware_guest` moves to the `elgeeko1.engineering` collection.
 - **BREAKING:** `terminal` no longer grants passwordless sudo and drops `terminal_user` and
   `terminal_sudo_nopassword`; `passwordless_sudo` grants it to `passwordless_sudo_user`.
+- The collection requires ansible-core 2.21 or later, so a controller with Python 3.12 can run it.
 - `git` writes its GPG key export to `~/.cache/elgeeko1.workstation/git`.
 
 ### Fixed
