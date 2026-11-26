@@ -48,6 +48,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `core_target_user` is removed; no task read it.
 - `core` no longer creates `~/.cache`.
 
+### Fixed
+
+- `time` runs under `--check` on a host that does not have `ntpsec` installed.
+
 ## [2.0.0] - 2026-11-03
 
 ### Added

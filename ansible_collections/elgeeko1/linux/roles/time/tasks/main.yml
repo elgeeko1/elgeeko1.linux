@@ -34,14 +34,18 @@
 
 - name: Package install ntpsec
   when: time_ntp_enabled
+  register: _time_r_ntpsec
   become: true
   ansible.builtin.package:
     name:
       - ntpsec
     state: present
 
+# --check does not install ntpsec, so a host without the package has no ntpsec service to start
 - name: Enable ntpsec
-  when: time_ntp_enabled
+  when:
+    - time_ntp_enabled
+    - not (ansible_check_mode and _time_r_ntpsec is changed)
   become: true
   ansible.builtin.service:
     name: ntpsec
