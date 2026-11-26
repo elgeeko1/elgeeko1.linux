@@ -12,3 +12,7 @@ argument_specs:
         description: Install ntpsec and keep its service running.
         type: bool
         default: true
+      time_local_rtc:
+        description: Keep the hardware clock in local time instead of UTC; false leaves the setting unchanged.
+        type: bool
+        default: false

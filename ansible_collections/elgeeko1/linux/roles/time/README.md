@@ -5,6 +5,7 @@ Sets the timezone and runs NTP on Debian and Ubuntu hosts.
 ## Features
 
 - Sets the timezone.
+- Optionally keeps the hardware clock in local time instead of UTC.
 - Installs ntpsec and keeps its service running.
 
 ## Requirements
@@ -20,6 +21,7 @@ Sets the timezone and runs NTP on Debian and Ubuntu hosts.
 | -- | -- | -- | -- |
 | `time_timezone` | str | - | IANA timezone name, such as `America/Los_Angeles`; unset leaves the timezone unchanged. |
 | `time_ntp_enabled` | bool | `true` | Install ntpsec and keep its service running. |
+| `time_local_rtc` | bool | `false` | Keep the hardware clock in local time instead of UTC; false leaves the setting unchanged. |
 
 <!-- END_ANSIBLE_DOCS -->
 

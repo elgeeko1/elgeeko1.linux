@@ -9,3 +9,4 @@
 ---
 time_timezone:
 time_ntp_enabled: true
+time_local_rtc: false

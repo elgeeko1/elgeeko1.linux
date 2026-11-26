@@ -7,6 +7,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- `time` keeps the hardware clock in local time instead of UTC when `time_local_rtc` is true.
+
 ### Changed
 
 - **BREAKING:** `core` splits into `ansible_prereqs`, `apt_upgrade`, and `time`, and its `~/.ssh`

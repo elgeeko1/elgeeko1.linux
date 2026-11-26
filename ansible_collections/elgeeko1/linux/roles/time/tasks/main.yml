@@ -26,6 +26,12 @@
   community.general.timezone:
     name: "{{ time_timezone }}"
 
+- name: Set the hardware clock to local time
+  when: time_local_rtc
+  become: true
+  community.general.timezone:
+    hwclock: local
+
 - name: Package install ntpsec
   when: time_ntp_enabled
   become: true
